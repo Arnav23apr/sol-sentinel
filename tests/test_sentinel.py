@@ -195,6 +195,36 @@ class TestHistoryContract(unittest.TestCase):
                 f.write('{"ts":1,"tps":100}\n{ broken\n{"ts":2,"tps":200}\n')
             self.assertEqual([r["tps"] for r in history.load(path)], [100, 200])
 
+    def test_union_merge_duplicates_are_collapsed(self):
+        # data/history.jsonl uses merge=union, so a local run racing the
+        # scheduled bot can legitimately produce two rows for one timestamp.
+        # Duplicates left in place would skew every rolling baseline.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "history.jsonl")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write('{"ts":1,"tps":100}\n'
+                        '{"ts":1,"tps":100,"sol_price":70}\n'
+                        '{"ts":2,"tps":200}\n')
+            rows = history.load(path)
+            self.assertEqual(len(rows), 2)
+            # The more complete row wins.
+            self.assertEqual(rows[0]["sol_price"], 70)
+
+    def test_conflict_markers_are_skipped(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "history.jsonl")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write('<<<<<<< HEAD\n{"ts":1,"tps":100}\n=======\n'
+                        '{"ts":2,"tps":200}\n>>>>>>> other\n')
+            self.assertEqual([r["tps"] for r in history.load(path)], [100, 200])
+
+    def test_rows_come_back_in_timestamp_order(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "history.jsonl")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write('{"ts":3,"tps":3}\n{"ts":1,"tps":1}\n{"ts":2,"tps":2}\n')
+            self.assertEqual([r["ts"] for r in history.load(path)], [1, 2, 3])
+
 
 class TestErrorIsolation(unittest.TestCase):
     def test_a_dead_source_degrades_only_its_own_section(self):

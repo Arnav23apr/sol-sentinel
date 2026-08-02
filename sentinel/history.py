@@ -27,19 +27,45 @@ def append(row: dict, path: str = HISTORY_PATH) -> None:
 
 
 def load(path: str = HISTORY_PATH) -> list[dict]:
+    """Read the metric history, tolerating damage.
+
+    The file is committed by CI and can also be written locally, so it is
+    merged with `merge=union` (see .gitattributes). That is the right merge
+    for an append-only log but it can duplicate a timestamp when two runs
+    overlap, and a conflict resolved by hand could leave a stray line. Both
+    are handled here rather than left to poison the anomaly baselines: rows
+    are deduplicated by timestamp, keeping the most complete one, and
+    returned in timestamp order.
+    """
     if not os.path.exists(path):
         return []
-    rows = []
+    by_ts: dict = {}
+    loose: list = []
     with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
-            if not line:
-                continue
+            if not line or line.startswith(("<<<<<<<", "=======", ">>>>>>>")):
+                continue  # never let one bad line kill the run
             try:
-                rows.append(json.loads(line))
+                row = json.loads(line)
             except json.JSONDecodeError:
-                continue  # never let one corrupt line kill the run
-    return rows
+                continue
+            if not isinstance(row, dict):
+                continue
+            ts = row.get("ts")
+            if ts is None:
+                loose.append(row)
+                continue
+            prev = by_ts.get(ts)
+            # More populated row wins: a later schema adds fields, and a run
+            # with a stale section writes fewer.
+            if prev is None or _filled(row) > _filled(prev):
+                by_ts[ts] = row
+    return [by_ts[k] for k in sorted(by_ts)] + loose
+
+
+def _filled(row: dict) -> int:
+    return sum(1 for v in row.values() if v is not None)
 
 
 def series(rows: list[dict], key: str) -> list[tuple[float, float]]:
