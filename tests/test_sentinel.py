@@ -18,7 +18,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sentinel import anomaly, collector, fmt, history  # noqa: E402
+from sentinel import anomaly, collect_defi, collector, fmt, history, main  # noqa: E402
 from sentinel.collect_news import _items_from_feed, _parse_date  # noqa: E402
 
 
@@ -161,6 +161,23 @@ class TestHistoryContract(unittest.TestCase):
     def test_missing_sections_do_not_raise(self):
         self.assertIsNone(history.headline_row({"ts": 1})["tps"])
 
+    def test_stale_sections_are_recorded_as_gaps_not_repeated_values(self):
+        # Re-recording last run's price under this run's timestamp would
+        # fabricate a data point and, over a multi-run outage, flatten the
+        # anomaly baseline to zero variance.
+        row = history.headline_row(self.SNAPSHOT, stale=["market"])
+        self.assertIsNone(row["sol_price"])
+        self.assertIsNone(row["market_cap"])
+        self.assertEqual(row["tps"], 2800.0)  # unaffected sections stay live
+
+    def test_a_gap_does_not_flatten_the_baseline(self):
+        now = int(time.time())
+        rows = [{"ts": now - (60 - i) * 1800,
+                 "sol_price": None if i >= 30 else 72.0 + (i % 3)}
+                for i in range(60)]
+        # The outage half contributes nothing rather than 30 identical points.
+        self.assertEqual(len(history.series(rows, "sol_price")), 30)
+
     def test_round_trip_through_the_jsonl_file(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "data", "history.jsonl")
@@ -219,6 +236,56 @@ class TestErrorIsolation(unittest.TestCase):
                     self.assertIn("market", snap["stale_sections"])
             finally:
                 os.chdir(cwd)
+
+
+class TestDefiPartialFailure(unittest.TestCase):
+    """The DeFi section fans out to four independent DeFiLlama endpoints, so
+    one bad endpoint must not blank the three that worked."""
+
+    def test_a_failed_endpoint_keeps_the_others(self):
+        def boom():
+            raise RuntimeError("llama 500")
+
+        with mock.patch.multiple(
+            collect_defi,
+            tvl=lambda: {"tvl_usd": 4.7e9, "stablecoins_usd": 1.5e10},
+            dex=lambda: {"dex_volume_24h_usd": 1.3e9},
+            fees_and_rev=boom,
+            stablecoin_breakdown=lambda: [],
+        ):
+            out = collect_defi.defi()
+        self.assertEqual(out["tvl_usd"], 4.7e9)
+        self.assertEqual(out["dex_volume_24h_usd"], 1.3e9)
+        self.assertIn("fees", out["partial_errors"])
+
+    def test_total_failure_raises_so_the_section_goes_stale(self):
+        def boom():
+            raise RuntimeError("llama down")
+
+        with mock.patch.multiple(collect_defi, tvl=boom, dex=boom,
+                                 fees_and_rev=boom,
+                                 stablecoin_breakdown=boom):
+            with self.assertRaises(Exception):
+                collect_defi.defi()
+
+    def test_missing_solana_row_gives_a_readable_error(self):
+        with self.assertRaises(Exception) as ctx:
+            collect_defi._find_solana([{"name": "Ethereum"}], "llama /v2/chains")
+        self.assertIn("Solana", str(ctx.exception))
+
+
+class TestAtomicWrites(unittest.TestCase):
+    def test_a_failed_render_cannot_truncate_the_previous_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "report.json")
+            main._write(path, '{"good": true}')
+            try:
+                main._write(path, json.dumps({"x": float("nan")},
+                                             allow_nan=False))
+            except ValueError:
+                pass
+            with open(path, encoding="utf-8") as f:
+                self.assertEqual(json.load(f), {"good": True})
 
 
 class TestNewsParsing(unittest.TestCase):

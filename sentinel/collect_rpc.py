@@ -147,6 +147,10 @@ def validators() -> dict:
     active_stake = sum(x["activatedStake"] for x in current)
     delinquent_stake = sum(x["activatedStake"] for x in delinquent)
     total = active_stake + delinquent_stake
+    if not active_stake:
+        # A degraded RPC answering with an empty validator set would otherwise
+        # divide by zero in every share calculation below.
+        raise FetchError("getVoteAccounts returned no active stake")
 
     ranked = sorted(current, key=lambda x: x["activatedStake"], reverse=True)
 

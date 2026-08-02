@@ -13,6 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "@/components/dither-kit"
+import { LoadingSkeleton } from "@/components/motion"
 import { Card, Grid, LinkList, Pill, Section, Table, Tile } from "@/components/shell"
 import { day, int, num, pct, shortKey, thin, usd } from "@/format"
 import type { HistoryRow, Report } from "@/types"
@@ -131,15 +132,7 @@ export default function App() {
     )
   }
 
-  if (!report) {
-    return (
-      <main className="flex h-full items-center justify-center">
-        <p className="animate-pulse text-[12px] text-muted-foreground uppercase tracking-widest">
-          Reading the chain…
-        </p>
-      </main>
-    )
-  }
+  if (!report) return <LoadingSkeleton />
 
   const { network: n, validators: v, market: m, defi: d } = report
   const { activity: a, tokenized: tk, dev, news } = report
@@ -793,6 +786,13 @@ export default function App() {
               className="text-foreground underline"
             >
               dither-kit
+            </a>
+            , motion recipes from{" "}
+            <a
+              href="https://transitions.dev/"
+              className="text-foreground underline"
+            >
+              transitions.dev
             </a>{" "}
             ·{" "}
             <a href="./report.md" className="text-foreground underline">

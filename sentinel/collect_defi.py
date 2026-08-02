@@ -25,18 +25,27 @@ def _trim(chart: list, days: int, drop_partial_last: bool = False) -> list:
     return rows
 
 
+def _find_solana(rows: list, source: str) -> dict:
+    """Locate the Solana row, failing with a readable message. A bare next()
+    would raise StopIteration if the API ever omits or renames the entry,
+    which reads like a bug in our code rather than a bad upstream response."""
+    row = next((r for r in rows if r.get("name") == "Solana"), None)
+    if row is None:
+        raise FetchError(f"no Solana entry in {source}")
+    return row
+
+
 def tvl() -> dict:
     out: dict = {}
     chains = fetch_json(f"{LLAMA}/v2/chains", timeout=20)
-    sol = next(c for c in chains if c.get("name") == "Solana")
-    out["tvl_usd"] = round(sol["tvl"], 0)
+    out["tvl_usd"] = round(_find_solana(chains, "llama /v2/chains")["tvl"], 0)
 
     hist = fetch_json(f"{LLAMA}/v2/historicalChainTvl/Solana", timeout=20)
     out["tvl_history"] = _trim([[p["date"], p["tvl"]] for p in hist], TVL_HISTORY_DAYS)
 
     rows = fetch_json(f"{STABLES}/stablecoinchains", timeout=20)
-    srow = next(r for r in rows if r.get("name") == "Solana")
-    pegged = srow.get("totalCirculatingUSD", {})
+    pegged = _find_solana(rows, "llama /stablecoinchains").get(
+        "totalCirculatingUSD", {})
     out["stablecoins_usd"] = round(sum(v for v in pegged.values()
                                        if isinstance(v, (int, float))), 0)
     return out
@@ -92,15 +101,19 @@ def fees_and_rev() -> dict:
     for p in f.get("protocols", []):
         if p.get("protocolType") == "chain":
             chain_fees = p.get("total24h")
-        elif p.get("name") == "Jito MEV Tips":
+            continue  # the chain itself is not an app
+        if p.get("name") == "Jito MEV Tips":
             jito_tips = p.get("total24h")
-        if p.get("total24h") and p.get("protocolType") != "chain":
+            continue  # counted as REV, not as an app's fees
+        if p.get("total24h"):
             top.append({"name": p.get("displayName") or p.get("name"),
                         "fees_24h_usd": round(p["total24h"], 0)})
     top.sort(key=lambda x: -x["fees_24h_usd"])
     out["top_fee_apps"] = top[:8]
-    out["chain_fees_24h_usd"] = round(chain_fees, 0) if chain_fees else None
-    out["jito_tips_24h_usd"] = round(jito_tips, 0) if jito_tips else None
+    # `is not None`, not truthiness: a genuine zero is a real reading, and
+    # showing it as missing would contradict rev_24h_usd computed below.
+    out["chain_fees_24h_usd"] = round(chain_fees, 0) if chain_fees is not None else None
+    out["jito_tips_24h_usd"] = round(jito_tips, 0) if jito_tips is not None else None
     if chain_fees is not None:
         out["rev_24h_usd"] = round(chain_fees + (jito_tips or 0), 0)
     out["fees_24h_usd"] = out["app_fees_24h_usd"]
@@ -115,17 +128,33 @@ def fees_and_rev() -> dict:
         rev = [[int(d), round(v + jito_by_day.get(int(d), 0), 2)]
                for d, v in chain_hist]
         out["rev_history"] = _trim(rev, CHART_DAYS, drop_partial_last=True)
-    except (FetchError, KeyError, TypeError):
+    except (FetchError, KeyError, TypeError, ValueError):
         pass
     return out
 
 
 def defi() -> dict:
-    out: dict = {}
-    for part in (tvl, dex, fees_and_rev):
-        out.update(part())
-    try:
-        out["stablecoins_top"] = stablecoin_breakdown()
-    except Exception:  # noqa: BLE001 — breakdown is a nice-to-have
-        pass
+    """Each part hits an independent DeFiLlama endpoint, so each is isolated:
+    a failure in the fees endpoint must not blank out TVL and DEX volume that
+    were fetched successfully in the same run."""
+    out: dict = {"partial_errors": {}}
+    # Names are spelled out rather than taken from __name__ so the error keys
+    # in the published report stay stable if a function is ever renamed.
+    for name, part in (("tvl", tvl), ("dex", dex), ("fees", fees_and_rev),
+                       ("stablecoins", stablecoin_breakdown)):
+        try:
+            result = part()
+        except Exception as e:  # noqa: BLE001 — isolate this endpoint only
+            out["partial_errors"][name] = repr(e)
+            continue
+        if name == "stablecoins":
+            out["stablecoins_top"] = result
+        else:
+            out.update(result)
+    if not out["partial_errors"]:
+        del out["partial_errors"]
+    # Only a total wipeout is worth failing the section over; anything less
+    # keeps the parts that did work.
+    if not any(k in out for k in ("tvl_usd", "dex_volume_24h_usd", "fees_24h_usd")):
+        raise FetchError(f"every DeFiLlama endpoint failed: {out['partial_errors']}")
     return out

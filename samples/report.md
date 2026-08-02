@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-02 04:51 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-02 04:58 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -11,16 +11,16 @@
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 2.7K |
+| TPS (total, 10-min median) | 2.8K |
 | TPS (non-vote) | 1.1K |
-| Slot time | 418.1 ms |
+| Slot time | 419.6 ms |
 | Slot | 437M |
 | Block height | 415M |
-| Epoch | 1010 (88.18% complete, ~5.9h remaining) |
+| Epoch | 1010 (88.40% complete, ~5.8h remaining) |
 | Lifetime transactions | 534.4B |
 | Circulating supply | 581.1M SOL |
 | Inflation (annual) | 3.72% |
-| AMM write-lock congestion (150-slot window) | 10.00% of slots needed a priority fee (max 2.7M µlam/CU) |
+| AMM write-lock congestion (150-slot window) | 9.30% of slots needed a priority fee (max 853.3K µlam/CU) |
 | Node version (RPC) | 4.1.0 |
 
 ## Validators & decentralization
@@ -55,10 +55,10 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $73.29 (+0.20% 24h) |
-| Market cap | $42.59B (rank #7) |
+| SOL price | $73.35 (+0.20% 24h) |
+| Market cap | $42.62B (rank #7) |
 | 24h volume | $1.23B |
-| ATH | $293.31 (-75.01% from ATH) |
+| ATH | $293.31 (-74.99% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
@@ -116,9 +116,9 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 228 |
-| Persistently-active cohort (capture-recapture est.) | 2.2K |
-| Unique payers across sampled blocks | 1.3K (8 blocks over 24h) |
+| Activity index: unique fee payers per block (24h sampled avg) | 253 |
+| Persistently-active cohort (capture-recapture est.) | 2.8K |
+| Unique payers across sampled blocks | 1.5K (8 blocks over 24h) |
 | xStocks tokenized-equity AUM | $349.22M |
 | xStocks 24h DEX volume | $3.53M |
 | xStocks holders | 244.3K |

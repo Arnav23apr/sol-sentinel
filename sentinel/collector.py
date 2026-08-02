@@ -33,6 +33,17 @@ SECTIONS = [
 ]
 
 
+def _write_json(path: str, payload: dict) -> None:
+    """Write via a temp file and rename, so a crash or a full disk can never
+    leave a half-written JSON file behind. The CI job commits whatever is on
+    disk, and a truncated report.json would break every consumer of it."""
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    tmp = f"{path}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(payload, f, separators=(",", ":"))
+    os.replace(tmp, path)
+
+
 def _load_previous() -> dict:
     if not os.path.exists(LATEST_PATH):
         return {}
@@ -74,16 +85,19 @@ def collect(verbose: bool = True) -> dict:
         m["market_cap_usd"] = round(m["price_usd"] * n["supply"]["circulating_sol"])
         m["market_cap_estimated"] = True
 
-    # History + anomalies.
-    row = history.headline_row(snapshot)
+    # History + anomalies. Metrics from a stale section are blanked out of the
+    # recorded row: re-recording last run's number under this run's timestamp
+    # would fabricate a data point. Left in, a multi-run outage would append
+    # the same value repeatedly until the rolling baseline flattened to zero
+    # variance, and the first real reading after recovery would then look like
+    # an infinite-sigma anomaly caused purely by the outage.
+    row = history.headline_row(snapshot, stale=snapshot["stale_sections"])
     rows = history.load()
     snapshot["anomalies"] = anomaly.detect(rows, row)
     history.append(row)
     snapshot["history"] = (rows + [row])[-1440:]  # last ~30 days for charts
 
-    os.makedirs(os.path.dirname(LATEST_PATH), exist_ok=True)
     persist = {k: v for k, v in snapshot.items() if k != "history"}
-    with open(LATEST_PATH, "w", encoding="utf-8") as f:
-        json.dump(persist, f, separators=(",", ":"))
+    _write_json(LATEST_PATH, persist)
 
     return snapshot

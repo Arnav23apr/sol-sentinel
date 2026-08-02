@@ -108,6 +108,61 @@ body::before {
   background: transparent;
 }
 
+/* Motion primitives, following the pure-CSS recipes from transitions.dev
+   (free tier: keyframes + custom-property knobs, toggled by a class). Two are
+   used here: digits pop in when a polled value actually changes, and skeleton
+   blocks pulse while the first snapshot loads. */
+
+.t-digit-group {
+  --digit-dur: 420ms;
+  --digit-distance: 0.42em;
+  --digit-blur: 5px;
+  --digit-stagger: 26ms;
+  --digit-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  display: inline-flex;
+}
+
+.t-digit {
+  display: inline-block;
+  white-space: pre;
+}
+
+.t-digit-group.is-animating .t-digit {
+  animation: t-digit-pop-in var(--digit-dur) var(--digit-ease) both;
+  animation-delay: calc(var(--digit-index, 0) * var(--digit-stagger));
+}
+
+@keyframes t-digit-pop-in {
+  0% {
+    transform: translateY(var(--digit-distance));
+    opacity: 0;
+    filter: blur(var(--digit-blur));
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.t-skeleton {
+  --pulse-dur: 1.6s;
+  --pulse-min: 0.38;
+  background: var(--muted);
+  border-radius: 6px;
+  animation: t-skeleton-pulse var(--pulse-dur) ease-in-out infinite;
+}
+
+@keyframes t-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--pulse-min);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -115,5 +170,11 @@ body::before {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  /* The skeleton is the exception: with animation effectively disabled it
+     would freeze at whatever opacity the pulse happened to land on, so pin it
+     to fully opaque instead. */
+  .t-skeleton {
+    opacity: 1 !important;
   }
 }

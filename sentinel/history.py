@@ -55,9 +55,19 @@ def series(rows: list[dict], key: str) -> list[tuple[float, float]]:
     return out
 
 
-def headline_row(snapshot: dict) -> dict:
-    """Flatten a full snapshot into the compact row we keep history for."""
+def headline_row(snapshot: dict, stale: Optional[list] = None) -> dict:
+    """Flatten a full snapshot into the compact row we keep history for.
+
+    Sections named in `stale` were served from the previous snapshot rather
+    than fetched this run, so their metrics are recorded as None. A gap is
+    honest; repeating yesterday's number under today's timestamp is not, and
+    it would quietly corrupt the anomaly baselines built from this file.
+    """
+    stale_sections = set(stale or ())
+
     def g(*path: str) -> Optional[Any]:
+        if path and path[0] in stale_sections:
+            return None
         cur: Any = snapshot
         for p in path:
             if not isinstance(cur, dict) or p not in cur:

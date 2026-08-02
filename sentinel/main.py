@@ -24,11 +24,19 @@ import json
 import os
 import threading
 import time
+import traceback
 
 from . import render_md
 from .collector import collect
 
 DOCS = "docs"
+
+
+def _write(path: str, text: str) -> None:
+    tmp = f"{path}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, path)
 
 
 def run_once(verbose: bool = True) -> dict:
@@ -37,16 +45,17 @@ def run_once(verbose: bool = True) -> dict:
         print(f"[sentinel] collecting @ {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}")
     snapshot = collect(verbose=verbose)
 
+    # Every output is written to a temp file and renamed into place, so an
+    # interrupted run can never leave a truncated report behind for the CI job
+    # to commit.
     os.makedirs(DOCS, exist_ok=True)
-    with open(os.path.join(DOCS, "report.md"), "w", encoding="utf-8") as f:
-        f.write(render_md.render(snapshot))
+    _write(os.path.join(DOCS, "report.md"), render_md.render(snapshot))
     machine = {k: v for k, v in snapshot.items() if k != "history"}
-    with open(os.path.join(DOCS, "report.json"), "w", encoding="utf-8") as f:
-        json.dump(machine, f, indent=1)
+    _write(os.path.join(DOCS, "report.json"), json.dumps(machine, indent=1))
     # Split out of report.json so the machine-readable report stays a clean
     # point-in-time document while the dashboard still gets its trend lines.
-    with open(os.path.join(DOCS, "history.json"), "w", encoding="utf-8") as f:
-        json.dump(snapshot.get("history") or [], f, separators=(",", ":"))
+    _write(os.path.join(DOCS, "history.json"),
+           json.dumps(snapshot.get("history") or [], separators=(",", ":")))
 
     if verbose:
         n_anom = len(snapshot.get("anomalies") or [])
@@ -79,7 +88,11 @@ def main() -> None:
                 print(f"[sentinel] run failed: {e!r}")
             time.sleep(args.loop * 60)
     elif args.serve:
-        run_once()
+        try:
+            run_once()
+        except Exception as e:  # noqa: BLE001 — serve whatever is on disk
+            print(f"[sentinel] initial collection failed, serving the existing "
+                  f"docs/ as-is: {e!r}")
 
         def refresher():
             while True:
@@ -96,7 +109,17 @@ def main() -> None:
               f"(refresh every {args.interval} min)")
         http.server.ThreadingHTTPServer(("", args.serve), handler).serve_forever()
     else:
-        run_once()
+        # Deliberately not swallowed. Per-source failures are already isolated
+        # inside collect(), so anything reaching here is a real defect, and the
+        # scheduled job must go red rather than quietly publish nothing.
+        # Outputs are written atomically, so the last good report survives.
+        try:
+            run_once()
+        except Exception:
+            traceback.print_exc()
+            print("\n[sentinel] collection failed; docs/ still holds the last "
+                  "good report.")
+            raise SystemExit(1)
 
 
 if __name__ == "__main__":

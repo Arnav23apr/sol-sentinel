@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { Sparkline } from "@/components/dither-kit"
 import type { DitherColor } from "@/components/dither-kit"
+import { AnimatedValue } from "@/components/motion"
 import { cn } from "@/lib/utils"
 
 export function Section({
@@ -93,9 +94,10 @@ export function Tile({
     >
       <div className="px-4 text-[11px] text-muted-foreground">{label}</div>
       <div className="mt-1 flex items-baseline gap-2 px-4">
-        <span className="font-semibold text-[22px] text-foreground tracking-tight">
-          {value}
-        </span>
+        <AnimatedValue
+          value={value}
+          className="font-semibold text-[22px] text-foreground tracking-tight"
+        />
         {delta && (
           <span
             className={cn(
