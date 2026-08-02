@@ -29,6 +29,13 @@ function sparkOf(history: HistoryRow[], key: string, max = 64): number[] {
   return thin(vals, max)
 }
 
+/** A cross-check reading. Small values keep two decimals: rounding a $73.63
+ * vs $73.59 price comparison to "74 vs 74" would hide exactly what the check
+ * is demonstrating. */
+function reading(v: number): string {
+  return Math.abs(v) < 1000 ? v.toFixed(2) : int(Math.round(v))
+}
+
 /** Charts take rows of objects; the collector emits [timestamp, value] pairs. */
 function toRows(pairs: [number, number][] | undefined, key: string) {
   return (pairs ?? []).map(([t, v]) => ({ t, [key]: v }))
@@ -257,6 +264,31 @@ export default function App() {
               value={`${num(n.supply.circulating_sol)} SOL`}
               sub={`inflation ${pct(n.inflation_total_pct)}/yr`}
             />
+            {a.median_tx_fee_lamports != null && (
+              <Tile
+                label="Median transaction fee"
+                value={`${int(a.median_tx_fee_lamports)} lam`}
+                sub={
+                  m.price_usd
+                    ? `about $${(
+                        (a.median_tx_fee_lamports / 1e9) *
+                        m.price_usd
+                      ).toFixed(5)} · p90 ${int(a.p90_tx_fee_lamports)}`
+                    : `p90 ${int(a.p90_tx_fee_lamports)}`
+                }
+                spark={sparkOf(history, "median_tx_fee")}
+                sparkColor="orange"
+              />
+            )}
+            {a.base_fee_only_pct != null && (
+              <Tile
+                label="Paying base fee only"
+                value={pct(a.base_fee_only_pct)}
+                sub={`of ${int(a.fee_sampled_txs)} sampled transactions · the rest bid for priority`}
+                spark={sparkOf(history, "base_fee_only_pct")}
+                sparkColor="green"
+              />
+            )}
           </Grid>
 
           <div className="mt-2.5 grid gap-2.5 lg:grid-cols-[2fr_1fr]">
@@ -687,6 +719,47 @@ export default function App() {
             />
           </Card>
         </Section>
+
+        {report.crosscheck && report.crosscheck.checks.length > 0 && (
+          <Section
+            title="Cross-source validation"
+            note={`${report.crosscheck.agree} of ${report.crosscheck.total} independent sources agree`}
+          >
+            <Card>
+              <p className="mb-3 text-[12px] text-muted-foreground leading-relaxed">
+                Quantities two independent sources can both observe, compared
+                against each other. Agreement is evidence a number is real;
+                disagreement is itself a finding, and is raised as an alert.
+              </p>
+              <Table
+                head={["Quantity", "Source A", "Source B", "Gap", "Verdict"]}
+                align="llrrl"
+                rows={report.crosscheck.checks.map((c) => [
+                  c.label,
+                  <span className="text-muted-foreground">
+                    {c.a_source}: {reading(c.a_value)}
+                  </span>,
+                  <span className="text-muted-foreground">
+                    {c.b_source}: {reading(c.b_value)}
+                  </span>,
+                  pct(c.gap_pct, true),
+                  c.agrees ? (
+                    <span className="text-emerald-400">
+                      agree
+                      {c.a_interval_95
+                        ? ` (within 95% CI ${num(c.a_interval_95[0])}–${num(
+                            c.a_interval_95[1]
+                          )})`
+                        : ""}
+                    </span>
+                  ) : (
+                    <span className="text-amber-400">diverge</span>
+                  ),
+                ])}
+              />
+            </Card>
+          </Section>
+        )}
 
         <Section title="Protocol development">
           <div className="grid gap-2.5 lg:grid-cols-2">

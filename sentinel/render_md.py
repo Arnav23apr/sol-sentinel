@@ -49,6 +49,17 @@ def render(s: dict) -> str:
     add(f"| Lifetime transactions | {fmt.num(n.get('tx_count_total'))} |")
     add(f"| Circulating supply | {fmt.num(sup.get('circulating_sol'))} SOL |")
     add(f"| Inflation (annual) | {fmt.pct(n.get('inflation_total_pct'))} |")
+    act = s.get("activity", {})
+    if act.get("median_tx_fee_lamports") is not None:
+        price = (s.get("market") or {}).get("price_usd")
+        med = act["median_tx_fee_lamports"]
+        usd_note = f" (about ${med / 1e9 * price:.5f})" if price else ""
+        add(f"| Median transaction fee | {fmt.exact(med)} lamports{usd_note} |")
+        add(f"| Transaction fee p90 / p99 | "
+            f"{fmt.exact(act.get('p90_tx_fee_lamports'))} / "
+            f"{fmt.exact(act.get('p99_tx_fee_lamports'))} lamports |")
+        add(f"| Paying base fee only | {fmt.pct(act.get('base_fee_only_pct'))} "
+            f"of {fmt.exact(act.get('fee_sampled_txs'))} sampled transactions |")
     if n.get("prio_fee_nonzero_pct") is not None:
         add(f"| AMM write-lock congestion (150-slot window) | "
             f"{fmt.pct(n['prio_fee_nonzero_pct'])} of slots needed a priority "
@@ -177,6 +188,28 @@ def render(s: dict) -> str:
     if t.get("xstocks_top"):
         add("Top tokenized equities: " + ", ".join(
             f"{x['ticker']} ({fmt.usd(x['usd'])})" for x in t["xstocks_top"][:5]))
+        add("")
+
+    # ---- Cross-source validation -------------------------------------------
+    cc = s.get("crosscheck") or {}
+    if cc.get("checks"):
+        add("## Cross-source validation")
+        add("")
+        add(f"Quantities that two independent sources can both see, compared "
+            f"against each other. {cc.get('agree', 0)} of {cc.get('total', 0)} "
+            f"agree this run.")
+        add("")
+        add("| Quantity | Source A | Source B | Gap | Verdict |")
+        add("|---|---|---|---|---|")
+        for c in cc["checks"]:
+            unit = f" {c['unit']}" if c.get("unit") else ""
+            verdict = "agree" if c["agrees"] else "**diverge**"
+            if c.get("a_interval_95"):
+                lo, hi = c["a_interval_95"]
+                verdict += f" (95% CI {fmt.num(lo, 0)} to {fmt.num(hi, 0)})"
+            add(f"| {c['label']} | {c['a_source']}: {fmt.num(c['a_value'], 2)}{unit} "
+                f"| {c['b_source']}: {fmt.num(c['b_value'], 2)}{unit} "
+                f"| {fmt.pct(c.get('gap_pct'), signed=True)} | {verdict} |")
         add("")
 
     # ---- Development ------------------------------------------------------

@@ -44,6 +44,8 @@ cd dashboard && npm install && npm run build
 
 **Network performance.** TPS (total and non-vote), slot time, slot height, block height, epoch number with progress and time-to-completion, lifetime transaction count, RPC health, node version, SOL supply (total, circulating, non-circulating), annual inflation rate, and a congestion gauge: the share of recent slots where write-locking hot AMM accounts (Raydium, Jupiter, Orca, Pump.fun) required a priority fee.
 
+**Transaction fees, measured from the chain.** Median, p90, p99 and mean fee for non-vote transactions, plus the share paying nothing above the 5,000-lamport base fee. Fees are read out of the same sampled blocks the activity index already fetches, so this costs no extra requests. Vote transactions are excluded deliberately: they are a fixed base fee and about half of all transactions, so including them pins every percentile to the base fee and hides what users actually pay.
+
 **Validators and decentralization.** Active vs delinquent validator counts, delinquent stake percentage, total active stake, Nakamoto coefficient computed from the live stake distribution, top-5/10/20 stake concentration, the full cumulative stake curve, stake-weighted commission across delegatable validators, a commission histogram, the share of stake sitting on private 100%-commission validators, and a top-validators table.
 
 **Economic indicators.** SOL price, 24h change, market cap and rank, 24h volume, distance from ATH, a 7-day price chart, stablecoin supply on Solana with a per-asset breakdown, daily DEX volume with a top-DEX table, app fees, and **REV (Real Economic Value): chain fees plus Jito MEV tips**, current and as a 90-day series.
@@ -90,6 +92,20 @@ A serious incident trips both layers at once (collapsing TPS is simultaneously a
 
 Every finding carries its evidence (value, baseline median, z-score) into all three outputs, so an alert is always explainable.
 
+## Cross-source validation
+
+Most of this report takes each number on faith from whichever endpoint served it. Three quantities, though, are observable from two independent directions, and comparing them is worth more than either reading alone: agreement is evidence the number is real, and disagreement is itself a finding. Each snapshot checks (see [`sentinel/crosscheck.py`](sentinel/crosscheck.py)):
+
+| Quantity | Source A | Source B |
+|---|---|---|
+| Chain fees (24h) | fees summed from blocks Sentinel samples itself | DeFiLlama's indexer |
+| SOL price | CoinGecko, aggregating centralised venues | Jupiter, quoting the on-chain DEX price |
+| Circulating supply | `getSupply` from the chain | CoinGecko's published figure |
+
+The fee comparison is the interesting one, because a flat tolerance would be arbitrary. Sentinel samples 8 blocks out of roughly 216,000 in a day, of a heavy-tailed quantity, so it computes a 95% confidence interval from the per-block variance (Student t, hardcoded critical values since SciPy is not available under the stdlib-only rule) and asks the question the sample can actually answer: does the other source's number fall inside our interval? Price and supply use tight relative tolerances, since those are near-exact quantities where a real gap is meaningful, on-chain-versus-centralised price divergence being a genuine market condition rather than noise.
+
+Divergences are raised as warnings in the same shape as anomalies, so they render through one code path in all three outputs.
+
 ## Measured on-chain activity (methodology)
 
 No keyless daily-active-addresses feed exists any more: DeFiLlama discontinued theirs, and Solscan, Coin Metrics and Dune are all key-gated. So Sentinel measures activity itself.
@@ -112,6 +128,7 @@ sentinel/               the collector: Python standard library only
   collect_activity.py   block sampling, capture-recapture, xStocks, RWA
   collector.py          orchestration + per-source error isolation
   anomaly.py            MAD z-scores + absolute health rules
+  crosscheck.py         independent-source agreement checks
   history.py            append-only JSONL metric history
   render_md.py          Markdown report
   fmt.py                shared formatting

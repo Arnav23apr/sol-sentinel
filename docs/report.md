@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-02 20:41 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-02 20:50 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -11,16 +11,19 @@
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 3.4K |
-| TPS (non-vote) | 1.7K |
-| Slot time | 416.7 ms |
+| TPS (total, 10-min median) | 3.2K |
+| TPS (non-vote) | 1.6K |
+| Slot time | 422.5 ms |
 | Slot | 437M |
 | Block height | 415M |
-| Epoch | 1011 (19.46% complete, ~40.3h remaining) |
+| Epoch | 1011 (19.76% complete, ~40.7h remaining) |
 | Lifetime transactions | 534.5B |
 | Circulating supply | 581.2M SOL |
 | Inflation (annual) | 3.71% |
-| AMM write-lock congestion (150-slot window) | 12.00% of slots needed a priority fee (max 2.7M µlam/CU) |
+| Median transaction fee | 5,287 lamports (about $0.00039) |
+| Transaction fee p90 / p99 | 17,800 / 498,000 lamports |
+| Paying base fee only | 23.90% of 4,299 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 9.30% of slots needed a priority fee (max 2.7M µlam/CU) |
 | Node version (RPC) | 4.1.0 |
 
 ## Validators & decentralization
@@ -55,10 +58,10 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $73.53 (+3.50% 24h) |
-| Market cap | $42.74B (rank #7) |
+| SOL price | $73.63 (+3.50% 24h) |
+| Market cap | $42.80B (rank #7) |
 | 24h volume | $1.03B |
-| ATH | $293.31 (-74.93% from ATH) |
+| ATH | $293.31 (-74.90% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
@@ -116,15 +119,25 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 235 |
-| Persistently-active cohort (capture-recapture est.) | 2.6K |
+| Activity index: unique fee payers per block (24h sampled avg) | 231 |
+| Persistently-active cohort (capture-recapture est.) | 2.4K |
 | Unique payers across sampled blocks | 1.4K (8 blocks over 24h) |
 | xStocks tokenized-equity AUM | $347.25M |
-| xStocks 24h DEX volume | $2.68M |
+| xStocks 24h DEX volume | $2.69M |
 | xStocks holders | 245.7K |
 | Total RWA TVL on Solana | $1.76B |
 
 Top tokenized equities: TSLAX ($58.67M), CRCLX ($45.64M), SPYX ($43.35M), MSTRX ($35.21M), QQQX ($29.83M)
+
+## Cross-source validation
+
+Quantities that two independent sources can both see, compared against each other. 3 of 3 agree this run.
+
+| Quantity | Source A | Source B | Gap | Verdict |
+|---|---|---|---|---|
+| Chain fees (24h) | sampled blocks (RPC): 334.65K USD | DeFiLlama: 424.81K USD | -23.74% | agree (95% CI 193K to 476K) |
+| SOL price | coingecko: 73.63 USD | Jupiter (on-chain DEX): 73.59 USD | +0.05% | agree |
+| Circulating supply | getSupply (RPC): 581.19M SOL | CoinGecko: 581.19M SOL | -0.00% | agree |
 
 ## Protocol development
 

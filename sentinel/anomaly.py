@@ -42,6 +42,9 @@ WATCHED = {
     "dex_vol_24h": ("DEX volume (24h)", "USD", "both"),
     "fees_24h": ("Network fees (24h)", "USD", "both"),
     "activity_idx": ("Activity index (fee payers per block)", "", "both"),
+    # Fees spiking is congestion worth flagging; fees falling is not an
+    # incident, so this one is watched in the spike direction only.
+    "median_tx_fee": ("Median transaction fee", "lamports", "spike"),
 }
 
 

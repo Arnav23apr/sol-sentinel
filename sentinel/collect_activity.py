@@ -33,11 +33,25 @@ from .net import FetchError, fetch_json
 SAMPLE_BLOCKS = 8
 SLOTS_PER_DAY = 216_000  # ~2.5 slots/s
 VOTE_PROGRAM = "Vote111111111111111111111111111111111111111"
+BASE_FEE_LAMPORTS = 5_000  # per signature, before any priority fee
+LAMPORTS = 1_000_000_000
+
+# Two-sided 95% Student-t critical values by degrees of freedom. Hardcoded
+# because scipy is not available under the stdlib-only rule; the table only
+# needs to cover the handful of sample sizes this collector uses.
+T_95 = {2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365,
+        8: 2.306, 9: 2.262, 10: 2.228, 11: 2.201, 12: 2.179}
 
 
-def _block_fee_payers(slot: int) -> set:
-    """Unique non-vote fee payers in one block; tries slot, slot+1, slot+2
-    (slots can be skipped)."""
+def _sample_block(slot: int) -> tuple[set, list, int]:
+    """Read one block and return (unique non-vote fee payers, non-vote fees in
+    lamports, total fees in the block including votes).
+
+    `transactionDetails: "accounts"` already carries `meta.fee`, so the fee
+    distribution is free: it rides along on the request the activity index
+    was going to make anyway. Tries slot, slot+1, slot+2 since slots can be
+    skipped.
+    """
     for candidate in (slot, slot + 1, slot + 2):
         try:
             block = rpc("getBlock", [candidate, {
@@ -48,29 +62,89 @@ def _block_fee_payers(slot: int) -> set:
             continue
         if not block or "transactions" not in block:
             continue
-        payers = set()
+        payers: set = set()
+        user_fees: list = []
+        total_fees = 0
         for tx in block["transactions"]:
             keys = (tx.get("transaction") or {}).get("accountKeys") or []
+            fee = (tx.get("meta") or {}).get("fee")
+            if fee is not None:
+                total_fees += fee
             if any(k.get("pubkey") == VOTE_PROGRAM for k in keys):
                 continue  # consensus vote transaction, not user activity
             if keys:
                 payers.add(keys[0]["pubkey"])
-        return payers
-    return set()
+            if fee is not None:
+                user_fees.append(fee)
+        return payers, user_fees, total_fees
+    return set(), [], 0
+
+
+def _fee_stats(user_fees: list, block_totals: list) -> dict:
+    """Transaction-fee distribution measured directly from sampled blocks.
+
+    Reported for non-vote transactions only. Vote transactions are a fixed
+    5,000-lamport base fee and make up roughly half of all transactions, so
+    including them drags every percentile to exactly the base fee and hides
+    what users actually pay.
+    """
+    out: dict = {}
+    if user_fees:
+        f = sorted(user_fees)
+        n = len(f)
+        out["median_tx_fee_lamports"] = f[n // 2]
+        out["p90_tx_fee_lamports"] = f[min(int(n * 0.9), n - 1)]
+        out["p99_tx_fee_lamports"] = f[min(int(n * 0.99), n - 1)]
+        out["mean_tx_fee_lamports"] = round(sum(f) / n)
+        # The share paying nothing above the 5,000-lamport base fee is a
+        # cleaner congestion read than the mean, which a handful of
+        # multi-SOL priority bids can move by an order of magnitude.
+        out["base_fee_only_pct"] = round(
+            sum(1 for x in f if x <= BASE_FEE_LAMPORTS) / n * 100, 1)
+        out["fee_sampled_txs"] = n
+    if block_totals:
+        avg_per_block = sum(block_totals) / len(block_totals)
+        out["avg_fees_per_block_sol"] = round(avg_per_block / LAMPORTS, 6)
+        # Extrapolated to a day so it can be cross-checked against the figure
+        # DeFiLlama reports for the same window (see crosscheck.py).
+        daily = avg_per_block / LAMPORTS * SLOTS_PER_DAY
+        out["measured_daily_fees_sol"] = round(daily)
+        # Eight blocks out of ~216,000 is a small sample of a heavy-tailed
+        # quantity, so the point estimate alone would imply false precision.
+        # Carry a 95% interval (Student t, n-1 df) so the cross-check can ask
+        # the statistically meaningful question -- does the other source's
+        # number fall inside our interval? -- instead of comparing against an
+        # arbitrary tolerance.
+        n = len(block_totals)
+        if n >= 3:
+            mean = avg_per_block
+            var = sum((x - mean) ** 2 for x in block_totals) / (n - 1)
+            stderr = (var ** 0.5) / (n ** 0.5)
+            t = T_95.get(n - 1, 1.96)
+            margin = t * stderr / LAMPORTS * SLOTS_PER_DAY
+            out["measured_daily_fees_sol_low"] = round(max(0.0, daily - margin))
+            out["measured_daily_fees_sol_high"] = round(daily + margin)
+    return out
 
 
 def activity() -> dict:
     tip = rpc("getEpochInfo")["absoluteSlot"]
     step = SLOTS_PER_DAY // SAMPLE_BLOCKS
     samples: list[set] = []
+    user_fees: list = []
+    block_totals: list = []
     for i in range(SAMPLE_BLOCKS):
-        payers = _block_fee_payers(tip - 150 - i * step)
+        payers, fees, total = _sample_block(tip - 150 - i * step)
         if payers:
             samples.append(payers)
+            user_fees.extend(fees)
+            block_totals.append(total)
 
     out: dict = {"sampled_blocks": len(samples)}
     if not samples:
         return out
+
+    out.update(_fee_stats(user_fees, block_totals))
 
     per_block = [len(s) for s in samples]
     out["unique_payers_per_block_avg"] = round(sum(per_block) / len(per_block))

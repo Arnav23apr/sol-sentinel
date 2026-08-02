@@ -11,7 +11,7 @@ import json
 import os
 import time
 
-from . import anomaly, history
+from . import anomaly, crosscheck, history
 from .collect_activity import activity, tokenized
 from .collect_defi import defi
 from .collect_dev import dev
@@ -85,6 +85,18 @@ def collect(verbose: bool = True) -> dict:
         m["market_cap_usd"] = round(m["price_usd"] * n["supply"]["circulating_sol"])
         m["market_cap_estimated"] = True
 
+    # Cross-source validation: compare independently-sourced views of the same
+    # quantity. Divergences become findings alongside the anomalies.
+    try:
+        snapshot["crosscheck"] = crosscheck.crosscheck(snapshot)
+        if verbose:
+            cc = snapshot["crosscheck"]
+            print(f"  [ok] crosscheck ({cc['agree']}/{cc['total']} sources agree)")
+    except Exception as e:  # noqa: BLE001 — a nice-to-have, never fatal
+        snapshot["errors"]["crosscheck"] = repr(e)
+        snapshot["crosscheck"] = {"checks": [], "agree": 0, "total": 0,
+                                  "divergences": []}
+
     # History + anomalies. Metrics from a stale section are blanked out of the
     # recorded row: re-recording last run's number under this run's timestamp
     # would fabricate a data point. Left in, a multi-run outage would append
@@ -93,7 +105,9 @@ def collect(verbose: bool = True) -> dict:
     # an infinite-sigma anomaly caused purely by the outage.
     row = history.headline_row(snapshot, stale=snapshot["stale_sections"])
     rows = history.load()
-    snapshot["anomalies"] = anomaly.detect(rows, row)
+    snapshot["anomalies"] = (
+        anomaly.detect(rows, row)
+        + crosscheck.divergence_findings(snapshot["crosscheck"]))
     history.append(row)
     snapshot["history"] = (rows + [row])[-1440:]  # last ~30 days for charts
 

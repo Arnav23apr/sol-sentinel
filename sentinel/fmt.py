@@ -27,6 +27,15 @@ def num(v: Optional[float], digits: int = 1) -> str:
     return f"{v:,.0f}"
 
 
+def exact(v: Optional[float]) -> str:
+    """Thousands-separated, never abbreviated. For quantities where the digits
+    themselves matter (lamport fees, transaction counts), which `num` would
+    round away into something like "6K"."""
+    if v is None:
+        return "-"
+    return f"{round(v):,}"
+
+
 def pct(v: Optional[float], signed: bool = False) -> str:
     if v is None:
         return "-"

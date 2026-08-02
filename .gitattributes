@@ -1,0 +1,10 @@
+# history.jsonl is append-only and keyed by timestamp, so a union of both
+# sides is always the correct merge. Without this, a local run racing the
+# scheduled bot leaves conflict markers in the metric database.
+data/history.jsonl merge=union
+
+# Everything else under docs/ and data/ is regenerated from history.jsonl by
+# the collector, so conflicts there are noise; resolve by re-running it.
+docs/report.json  -diff
+docs/history.json -diff
+data/latest.json  -diff

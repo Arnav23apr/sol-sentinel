@@ -125,6 +125,31 @@ export type Activity = {
   active_cohort_est?: number | null
   cohort_lower_bound?: number
   estimator?: string
+  median_tx_fee_lamports?: number
+  p90_tx_fee_lamports?: number
+  p99_tx_fee_lamports?: number
+  mean_tx_fee_lamports?: number
+  base_fee_only_pct?: number
+  fee_sampled_txs?: number
+  avg_fees_per_block_sol?: number
+  measured_daily_fees_sol?: number
+  measured_daily_fees_sol_low?: number
+  measured_daily_fees_sol_high?: number
+}
+
+export type CrossCheck = {
+  check: string
+  label: string
+  a_source: string
+  a_value: number
+  b_source: string
+  b_value: number
+  unit: string
+  gap_pct: number | null
+  agrees: boolean
+  tolerance_pct?: number
+  a_interval_95?: [number, number]
+  basis?: string
 }
 
 export type Tokenized = {
@@ -187,6 +212,12 @@ export type Report = {
   tokenized: Tokenized
   dev: Dev
   news: { items: NewsItem[]; feed_errors: Record<string, string> | null }
+  crosscheck?: {
+    checks: CrossCheck[]
+    agree: number
+    total: number
+    divergences: CrossCheck[]
+  }
 }
 
 /** One row of docs/history.json (the rolling metric history). */
