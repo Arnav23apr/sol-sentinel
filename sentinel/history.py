@@ -152,6 +152,8 @@ def headline_row(snapshot: dict, stale: Optional[list] = None) -> dict:
         "median_fee_lamports": g("network", "median_prioritization_fee"),
         "activity_idx": g("activity", "activity_index"),
         "active_cohort": g("activity", "active_cohort_est"),
+        "failure_rate_pct": g("onchain", "median_program_failure_rate_pct"),
+        "clock_drift_secs": g("onchain", "drift_secs"),
         "median_tx_fee": g("activity", "median_tx_fee_lamports"),
         "p90_tx_fee": g("activity", "p90_tx_fee_lamports"),
         "base_fee_only_pct": g("activity", "base_fee_only_pct"),

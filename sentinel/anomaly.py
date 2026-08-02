@@ -45,6 +45,9 @@ WATCHED = {
     # Fees spiking is congestion worth flagging; fees falling is not an
     # incident, so this one is watched in the spike direction only.
     "median_tx_fee": ("Median transaction fee", "lamports", "spike"),
+    # A jump in failed transactions is what congestion feels like to a user,
+    # so it is watched in the spike direction.
+    "failure_rate_pct": ("Median program failure rate", "%", "spike"),
 }
 
 

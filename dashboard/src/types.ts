@@ -137,6 +137,32 @@ export type Activity = {
   fees_per_block_sol_high?: number
 }
 
+export type ProgramStat = {
+  name: string
+  address: string
+  sampled: number
+  failure_rate_pct: number
+  tx_per_min?: number
+  tx_per_min_lower_bound?: number
+  window_secs?: number
+  window_slots?: number
+  counted?: number
+  low_precision?: boolean
+}
+
+export type OnChain = {
+  slot_secs_used?: number
+  programs?: ProgramStat[]
+  median_program_failure_rate_pct?: number
+  failure_rate_span_pct?: [number, number]
+  reference_slot?: number
+  chain_time?: number
+  drift_secs?: number
+  vote_accounts?: { vote: string; stake_sol?: number; balance_sol: number }[]
+  unwithdrawn_sol_top8?: number
+  errors?: Record<string, string>
+}
+
 export type CrossCheck = {
   check: string
   label: string
@@ -213,6 +239,7 @@ export type Report = {
   activity: Activity
   tokenized: Tokenized
   dev: Dev
+  onchain?: OnChain
   news: { items: NewsItem[]; feed_errors: Record<string, string> | null }
   crosscheck?: {
     checks: CrossCheck[]

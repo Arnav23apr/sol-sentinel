@@ -190,6 +190,53 @@ def render(s: dict) -> str:
             f"{x['ticker']} ({fmt.usd(x['usd'])})" for x in t["xstocks_top"][:5]))
         add("")
 
+    # ---- Direct on-chain observations ---------------------------------------
+    oc = s.get("onchain") or {}
+    progs = oc.get("programs") or []
+    if progs or oc.get("drift_secs") is not None:
+        add("## Program activity and chain health")
+        add("")
+        if oc.get("drift_secs") is not None:
+            add(f"Chain clock drift: **{oc['drift_secs']:+.1f} s** against wall "
+                f"clock (slots run slightly longer than the nominal 400 ms, so "
+                f"chain time falls behind real time).")
+            add("")
+        if progs:
+            add(f"Throughput and failure rate for major programs, from the last "
+                f"{fmt.exact(progs[0].get('sampled'))} signatures on each, timed "
+                f"by slot span. The failure rate is a direct read on user "
+                f"experience and is not published by volume-only dashboards.")
+            add("")
+            add("| Program | Transactions/min | Failed | Sample window |")
+            add("|---|---|---|---|")
+            for p in progs:
+                if p.get("tx_per_min") is not None:
+                    rate = fmt.exact(p["tx_per_min"])
+                    if p.get("low_precision"):
+                        rate += " (approx.)"
+                elif p.get("tx_per_min_lower_bound") is not None:
+                    rate = f">{fmt.exact(p['tx_per_min_lower_bound'])}"
+                else:
+                    rate = "-"
+                window = (f"{fmt.num(p['window_secs'], 1)} s"
+                          if p.get("window_secs") else "-")
+                add(f"| {p['name']} | {rate} "
+                    f"| {fmt.pct(p.get('failure_rate_pct'))} | {window} |")
+            add("")
+            if oc.get("median_program_failure_rate_pct") is not None:
+                span = oc.get("failure_rate_span_pct") or []
+                span_note = (f" (range {fmt.pct(span[0])} to {fmt.pct(span[1])})"
+                             if len(span) == 2 else "")
+                add(f"Median failure rate across the sampled programs: "
+                    f"**{fmt.pct(oc['median_program_failure_rate_pct'])}**"
+                    f"{span_note}. This is a consistent trend signal across "
+                    f"these five programs, not a chain-wide rate.")
+                add("")
+        if oc.get("unwithdrawn_sol_top8") is not None:
+            add(f"Unwithdrawn inflation rewards sitting in the top 8 vote "
+                f"accounts: **{fmt.num(oc['unwithdrawn_sol_top8'], 2)} SOL**.")
+            add("")
+
     # ---- Cross-source validation -------------------------------------------
     cc = s.get("crosscheck") or {}
     if cc.get("checks"):

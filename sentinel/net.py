@@ -7,12 +7,21 @@ handled uniformly.
 from __future__ import annotations
 
 import gzip
+import http.client
 import io
 import json
 import time
 import urllib.error
 import urllib.request
 from typing import Any, Optional
+
+# Errors worth retrying. http.client.HTTPException matters more than it looks:
+# a truncated response raises IncompleteRead, which subclasses HTTPException
+# and *not* OSError, so without it a large payload cut short mid-transfer
+# (getVoteAccounts is ~300 KB and has been observed truncating) fails the
+# whole section instead of retrying.
+TRANSIENT = (urllib.error.URLError, http.client.HTTPException, TimeoutError,
+             json.JSONDecodeError, OSError, ConnectionResetError)
 
 USER_AGENT = "sol-sentinel/1.0 (+https://github.com/Arnav23apr/sol-sentinel)"
 
@@ -79,7 +88,7 @@ def fetch_json(url: str, *, post: Optional[dict] = None, timeout: float = 20.0,
             if use_etag and etag:
                 _ETAG_CACHE[url] = (etag, data)
             return data
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as e:
+        except TRANSIENT as e:
             last_err = repr(e)
             time.sleep(backoff * (attempt + 1))
     raise FetchError(f"{url} failed after {retries + 1} attempts: {last_err}")
@@ -95,7 +104,7 @@ def fetch_text(url: str, *, timeout: float = 20.0, retries: int = 1) -> str:
                 time.sleep(1.0 * (attempt + 1))
                 continue
             return raw.decode("utf-8", errors="replace")
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
+        except TRANSIENT as e:
             last_err = repr(e)
             time.sleep(1.0 * (attempt + 1))
     raise FetchError(f"{url} failed: {last_err}")

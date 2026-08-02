@@ -19,10 +19,35 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sentinel import (  # noqa: E402
-    anomaly, collect_activity, collect_defi, collector, crosscheck, fmt,
-    history, main,
+    anomaly, collect_activity, collect_defi, collect_onchain, collector,
+    crosscheck, fmt, history, main, net,
 )
 from sentinel.collect_news import _items_from_feed, _parse_date  # noqa: E402
+
+
+_NET_GUARD = None
+
+
+def setUpModule():
+    """Fail any test that reaches the network.
+
+    Every test here is meant to run offline against fixtures and stubs. Twice
+    now a new collector section has quietly started making real requests from
+    inside a test, which showed up only as the suite getting slower. Blocking
+    the single chokepoint every request funnels through turns that into an
+    immediate, obvious failure instead.
+    """
+    global _NET_GUARD
+    _NET_GUARD = mock.patch.object(
+        net, "_request",
+        side_effect=AssertionError(
+            "test attempted a real network call; stub it instead"))
+    _NET_GUARD.start()
+
+
+def tearDownModule():
+    if _NET_GUARD is not None:
+        _NET_GUARD.stop()
 
 
 def flat_history(n: int = 200, **series) -> list[dict]:
@@ -255,7 +280,7 @@ class TestErrorIsolation(unittest.TestCase):
                     collector, "SECTIONS",
                     [("network", lambda: {"tps": 2800, "supply": {}}),
                      ("market", boom)],
-                ):
+                ), mock.patch.object(collector, "onchain", return_value={}):
                     snap = collector.collect(verbose=False)
                     self.assertEqual(snap["network"]["tps"], 2800)
                     self.assertIn("market", snap["errors"])
@@ -278,9 +303,10 @@ class TestErrorIsolation(unittest.TestCase):
                 def boom():
                     raise RuntimeError("endpoint down")
 
-                # crosscheck is stubbed because it would otherwise reach
-                # Jupiter for a live price; it has its own offline tests below.
+                # crosscheck and onchain are stubbed because both make their
+                # own requests; each has its own offline tests below.
                 with mock.patch.object(collector, "SECTIONS", [("market", boom)]), \
+                        mock.patch.object(collector, "onchain", return_value={}), \
                         mock.patch.object(collector.crosscheck, "crosscheck",
                                           return_value={"checks": [], "agree": 0,
                                                         "total": 0,
@@ -463,6 +489,89 @@ class TestFeeStats(unittest.TestCase):
 
     def test_no_samples_yields_no_claims(self):
         self.assertEqual(collect_activity._fee_stats([], []), {})
+
+
+class TestProgramStats(unittest.TestCase):
+    """Program throughput is derived from slot spans, which has two traps: the
+    oldest slot in a capped response is truncated, and the hottest programs
+    fill the cap within a slot or two."""
+
+    def stats(self, sigs, slot_secs=0.4):
+        with mock.patch.object(collect_onchain, "rpc", return_value=sigs):
+            return collect_onchain._program_stats("P", "addr", slot_secs)
+
+    def test_rate_excludes_the_truncated_oldest_slot(self):
+        # 10 signatures in slot 100 (truncated by the cap) and 10 in slot 101.
+        # Only the whole slot counts: 10 over 1 slot of 0.4s = 1,500/min.
+        sigs = ([{"slot": 100, "err": None}] * 10
+                + [{"slot": 101, "err": None}] * 10)
+        out = self.stats(sigs)
+        self.assertEqual(out["window_slots"], 1)
+        self.assertEqual(out["counted"], 10)
+        self.assertEqual(out["tx_per_min"], 1500)
+
+    def test_two_programs_saturating_do_not_report_identical_rates(self):
+        # The bug this replaced: both hit the cap, both spanned the same
+        # window, so both printed the same invented rate.
+        a = self.stats([{"slot": 100}] * 400 + [{"slot": 101}] * 600)
+        b = self.stats([{"slot": 100}] * 900 + [{"slot": 101}] * 100)
+        self.assertNotEqual(a["tx_per_min"], b["tx_per_min"])
+
+    def test_single_slot_is_reported_as_a_lower_bound(self):
+        out = self.stats([{"slot": 100, "err": None}] * 1000)
+        self.assertNotIn("tx_per_min", out)
+        self.assertEqual(out["tx_per_min_lower_bound"], 150_000)
+
+    def test_short_spans_are_flagged_as_coarse(self):
+        self.assertTrue(self.stats(
+            [{"slot": 100}] * 500 + [{"slot": 101}] * 500)["low_precision"])
+        self.assertNotIn("low_precision", self.stats(
+            [{"slot": 100 + i} for i in range(50)]))
+
+    def test_failure_rate_counts_err_entries(self):
+        sigs = [{"slot": 100 + i, "err": ("x" if i % 4 else None)}
+                for i in range(100)]
+        self.assertEqual(self.stats(sigs)["failure_rate_pct"], 75.0)
+
+    def test_measured_slot_time_is_used_not_the_nominal_400ms(self):
+        sigs = [{"slot": 100}] * 10 + [{"slot": 110}] * 10
+        fast = self.stats(sigs, slot_secs=0.4)["tx_per_min"]
+        slow = self.stats(sigs, slot_secs=0.8)["tx_per_min"]
+        self.assertEqual(fast, slow * 2)
+
+
+class TestChainClock(unittest.TestCase):
+    def test_drift_discounts_the_step_back_from_the_tip(self):
+        # Tip is 1000; slot 1000 has no block, so it falls back to 975. Chain
+        # time is 100s ago, but 25 slots x 0.4s of that is just those slots
+        # elapsing, so the real drift is 90s.
+        calls = {"n": 0}
+
+        def fake(method, params=None, **kw):
+            if method == "getSlot":
+                return 1000
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise net.FetchError("no block yet")
+            return time.time() - 100
+
+        with mock.patch.object(collect_onchain, "rpc", side_effect=fake):
+            out = collect_onchain.chain_clock(0.4)
+        self.assertEqual(out["reference_slot"], 975)
+        self.assertAlmostEqual(out["drift_secs"], 90, delta=1)
+
+    def test_fetches_its_own_tip_rather_than_reusing_a_stale_slot(self):
+        # Reusing the slot captured at the start of a run would charge the
+        # collector's own runtime to the chain as drift.
+        seen = []
+
+        def fake(method, params=None, **kw):
+            seen.append(method)
+            return 1000 if method == "getSlot" else time.time()
+
+        with mock.patch.object(collect_onchain, "rpc", side_effect=fake):
+            collect_onchain.chain_clock(0.4)
+        self.assertEqual(seen[0], "getSlot")
 
 
 class TestNewsParsing(unittest.TestCase):

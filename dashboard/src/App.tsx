@@ -143,6 +143,7 @@ export default function App() {
 
   const { network: n, validators: v, market: m, defi: d } = report
   const { activity: a, tokenized: tk, dev, news } = report
+  const oc = report.onchain
   const ep = n.epoch
   const anomalies = report.anomalies ?? []
   const priceUp = (m.change_24h_pct ?? 0) >= 0
@@ -719,6 +720,79 @@ export default function App() {
             />
           </Card>
         </Section>
+
+        {oc && (oc.programs?.length || oc.drift_secs != null) && (
+          <Section
+            title="Program activity & chain health"
+            note="measured directly on-chain"
+          >
+            <Grid>
+              {oc.drift_secs != null && (
+                <Tile
+                  label="Chain clock drift"
+                  value={`${oc.drift_secs > 0 ? "+" : ""}${oc.drift_secs.toFixed(1)} s`}
+                  sub="chain time against wall clock; slots run slightly long"
+                  spark={sparkOf(history, "clock_drift_secs")}
+                  sparkColor="purple"
+                />
+              )}
+              {oc.median_program_failure_rate_pct != null && (
+                <Tile
+                  label="Median failure rate"
+                  value={pct(oc.median_program_failure_rate_pct)}
+                  sub={
+                    oc.failure_rate_span_pct
+                      ? `across sampled programs, range ${pct(
+                          oc.failure_rate_span_pct[0]
+                        )} to ${pct(oc.failure_rate_span_pct[1])}`
+                      : "across sampled programs"
+                  }
+                  spark={sparkOf(history, "failure_rate_pct")}
+                  sparkColor="red"
+                />
+              )}
+              {oc.unwithdrawn_sol_top8 != null && (
+                <Tile
+                  label="Unwithdrawn rewards"
+                  value={`${num(oc.unwithdrawn_sol_top8, 2)} SOL`}
+                  sub="inflation rewards sitting in the top 8 vote accounts"
+                />
+              )}
+            </Grid>
+            {oc.programs && oc.programs.length > 0 && (
+              <Card className="mt-2.5">
+                <p className="mb-3 text-[12px] text-muted-foreground leading-relaxed">
+                  Throughput and failure rate for major programs, from the last{" "}
+                  {int(oc.programs[0].sampled)} signatures on each, timed by
+                  slot span. The failure rate is a direct read on user
+                  experience and is not published by volume-only dashboards.
+                </p>
+                <Table
+                  head={["Program", "Tx/min", "Failed", "Window"]}
+                  align="lrrr"
+                  rows={oc.programs.map((p) => [
+                    p.name,
+                    p.tx_per_min != null
+                      ? `${int(p.tx_per_min)}${p.low_precision ? " approx." : ""}`
+                      : p.tx_per_min_lower_bound != null
+                        ? `>${int(p.tx_per_min_lower_bound)}`
+                        : "-",
+                    <span
+                      className={
+                        p.failure_rate_pct >= 50
+                          ? "text-amber-400"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      {pct(p.failure_rate_pct)}
+                    </span>,
+                    `${num(p.window_secs, 1)} s`,
+                  ])}
+                />
+              </Card>
+            )}
+          </Section>
+        )}
 
         {report.crosscheck && report.crosscheck.checks.length > 0 && (
           <Section

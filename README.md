@@ -46,6 +46,10 @@ cd dashboard && npm install && npm run build
 
 **Transaction fees, measured from the chain.** Median, p90, p99 and mean fee for non-vote transactions, plus the share paying nothing above the 5,000-lamport base fee. Fees are read out of the same sampled blocks the activity index already fetches, so this costs no extra requests. Vote transactions are excluded deliberately: they are a fixed base fee and about half of all transactions, so including them pins every percentile to the base fee and hides what users actually pay.
 
+**Program activity and chain health, measured directly.** Throughput and **failure rate** for five major programs (Jupiter, Raydium, Orca, Pump.fun, SPL Token), from the last 1,000 signatures on each. The failure rate is the interesting one: it is a direct read on what using Solana actually feels like, it moves sharply during congestion and bot activity, and no dashboard reporting volume alone will show it. Also chain clock drift, the gap between Solana's own timestamps and wall clock, and inflation rewards accrued but not yet withdrawn from the largest vote accounts.
+
+Rates are timed by **slot span rather than `blockTime`**, which only has one-second resolution: the busiest programs fit all 1,000 signatures inside a single second, which would produce an invented figure. The oldest slot in each response is dropped, since a capped response holds only the tail of it and charging its full duration biases the rate down. Where the sample is still coarse, the number is labelled approximate rather than presented as precise.
+
 **Validators and decentralization.** Active vs delinquent validator counts, delinquent stake percentage, total active stake, Nakamoto coefficient computed from the live stake distribution, top-5/10/20 stake concentration, the full cumulative stake curve, stake-weighted commission across delegatable validators, a commission histogram, the share of stake sitting on private 100%-commission validators, and a top-validators table.
 
 **Economic indicators.** SOL price, 24h change, market cap and rank, 24h volume, distance from ATH, a 7-day price chart, stablecoin supply on Solana with a per-asset breakdown, daily DEX volume with a top-DEX table, app fees, and **REV (Real Economic Value): chain fees plus Jito MEV tips**, current and as a 90-day series.
@@ -62,13 +66,23 @@ Priority went to direct, keyless sources. Each source is isolated: if one fails,
 
 | Source | Transport | Used for |
 |---|---|---|
-| Solana JSON-RPC `api.mainnet-beta.solana.com` (fallback `solana-rpc.publicnode.com`) | `urllib` POST | getHealth, getVersion, getEpochInfo, getRecentPerformanceSamples, getSupply, getRecentPrioritizationFees, getVoteAccounts, getInflationRate, getInflationGovernor, getBlock (activity sampling) |
+| Solana JSON-RPC `api.mainnet-beta.solana.com` (fallback `solana-rpc.publicnode.com`) | `urllib` POST | getHealth, getVersion, getSlot, getBlockTime, getEpochInfo, getRecentPerformanceSamples, getSupply, getRecentPrioritizationFees, getVoteAccounts, getBalance, getSignaturesForAddress, getInflationRate, getInflationGovernor, getBlock |
 | DeFiLlama (`api.llama.fi`, `stablecoins.llama.fi`) | GET | TVL and history, stablecoin supply and per-asset breakdown, DEX volumes, fees, REV components (chain fees, Jito MEV tips), xStocks, RWA protocols |
 | CoinGecko (fallbacks: Jupiter lite-api, Binance, Coinbase) | GET | SOL price, market cap, rank, volume, ATH, 7d chart. If every source carrying market cap fails, mcap is estimated as price x on-chain circulating supply and labeled as estimated |
 | GitHub REST (unauthenticated) | GET | SIMD PRs, Agave and Firedancer releases (4 calls per run against the 60/hr anonymous limit) |
 | RSS/Atom (solana.com, Helius, Decrypt, The Block) | GET + `xml.etree` | Ecosystem news |
 
-Notes from building this: Ankr and dRPC have dropped keyless Solana RPC access; publicnode hangs on `getSupply`, so that one method never falls back; CoinGecko's keyless tier throttles bursts hard, so calls are spaced and every price value has a fallback chain; and `solana.com/data` renders its numbers client-side, so Sentinel reads the same underlying sources directly instead of scraping it.
+### Two named sources this deliberately does not use
+
+The brief lists Dune Analytics and Twitter among the sources to prioritise, and also states that solutions requiring no API keys are preferred. Those two asks conflict: Dune's API is key-gated on every tier, and Twitter/X removed free programmatic read access, leaving a paid key or terms-violating scraping.
+
+This resolves the conflict in favour of the keyless constraint, because that constraint is what makes the rest of the design work. With no keys and no packages, the collector runs on a free GitHub Actions runner every 30 minutes forever, anyone can clone the repo and get identical results with zero setup, and there is no credential to rotate, leak, or expire. Adding one keyed source would forfeit all of that for a fraction of the data.
+
+Where those sources would have contributed, Sentinel goes to the underlying data instead. Dune dashboards are themselves built on chain data, so Sentinel queries the chain directly, and in several cases measures quantities Dune would have to be trusted for: transaction fee distribution, per-program throughput and failure rates, block production rate, and clock drift are all computed from raw RPC here. The Twitter gap is narrower: announcements arrive through the solana.com and Helius feeds, but social sentiment is genuinely not covered, and no keyless substitute for it exists.
+
+### Other notes
+
+Ankr and dRPC have dropped keyless Solana RPC access; publicnode hangs on `getSupply`, so that one method never falls back; CoinGecko's keyless tier throttles bursts hard, so calls are spaced and every price value has a fallback chain; and `solana.com/data` renders its numbers client-side, so Sentinel reads the same underlying sources directly instead of scraping it.
 
 ## Automation strategy
 
@@ -135,6 +149,7 @@ sentinel/               the collector: Python standard library only
   collector.py          orchestration + per-source error isolation
   anomaly.py            MAD z-scores + absolute health rules
   crosscheck.py         independent-source agreement checks
+  collect_onchain.py    program activity, clock drift, vote balances
   history.py            append-only JSONL metric history
   render_md.py          Markdown report
   fmt.py                shared formatting

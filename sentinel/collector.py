@@ -17,6 +17,7 @@ from .collect_defi import defi
 from .collect_dev import dev
 from .collect_market import market
 from .collect_news import news
+from .collect_onchain import onchain
 from .collect_rpc import network, validators
 
 LATEST_PATH = os.path.join("data", "latest.json")
@@ -84,6 +85,26 @@ def collect(verbose: bool = True) -> dict:
             and m.get("price_usd") and (n.get("supply") or {}).get("circulating_sol")):
         m["market_cap_usd"] = round(m["price_usd"] * n["supply"]["circulating_sol"])
         m["market_cap_estimated"] = True
+
+    # Direct on-chain observations. Runs after the loop because it needs the
+    # current slot and the top validators discovered above, and it is isolated
+    # the same way every other section is.
+    started = time.time()
+    try:
+        snapshot["onchain"] = onchain(
+            slot_ms=(snapshot.get("network") or {}).get("slot_time_ms"),
+            top_validators=(snapshot.get("validators") or {}).get("top_validators"))
+        if verbose:
+            n_prog = len(snapshot["onchain"].get("programs") or [])
+            print(f"  [ok] onchain ({n_prog} programs, {time.time() - started:.1f}s)")
+    except Exception as e:  # noqa: BLE001 — isolation is the whole point
+        snapshot["errors"]["onchain"] = repr(e)
+        prev_section = previous.get("onchain")
+        if prev_section is not None:
+            snapshot["onchain"] = prev_section
+            snapshot["stale_sections"].append("onchain")
+        if verbose:
+            print(f"  [FAIL] onchain: {e!r}")
 
     # Block-production rate measured from how far block height advanced
     # between runs. Anything extrapolated from a per-block figure needs this
