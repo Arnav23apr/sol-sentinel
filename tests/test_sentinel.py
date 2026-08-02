@@ -114,6 +114,41 @@ class TestDetect(unittest.TestCase):
         self.assertTrue(any(f["metric"] == "sol_price" for f in up))
         self.assertTrue(any(f["metric"] == "sol_price" for f in down))
 
+    def test_a_statistically_huge_but_trivially_small_move_is_ignored(self):
+        # The bug this guards: a metric that has been stable has a near-zero
+        # MAD, so a 0.13% change scores hundreds of sigma. TVL moving from
+        # $4.7499B to $4.7559B was published as CRITICAL at 415 sigma.
+        # A very tight window, as a stable metric actually produces: TVL
+        # drifting by a few hundred thousand on a $4.75B base.
+        now = int(time.time())
+        rows = [{"ts": now - (60 - i) * 1800,
+                 "tvl": 4_749_940_154 + (i % 4) * 100_000} for i in range(60)]
+        latest = {"ts": now, "tvl": 4_755_944_251}  # +0.13%
+        z = anomaly.robust_z(4_755_944_251,
+                             [v for _, v in history.series(rows, "tvl")])
+        self.assertGreater(abs(z), anomaly.Z_WARNING)  # still a huge z-score
+        self.assertEqual(anomaly.detect(rows, latest), [])  # but not reported
+
+    def test_a_move_that_clears_both_bars_is_reported(self):
+        now = int(time.time())
+        rows = [{"ts": now - (60 - i) * 1800,
+                 "tvl": 4_700_000_000 + (i % 4) * 100_000} for i in range(60)]
+        latest = {"ts": now, "tvl": 3_100_000_000}  # -34%
+        self.assertTrue(any(f["metric"] == "tvl"
+                            for f in anomaly.detect(rows, latest)))
+
+    def test_every_watched_metric_declares_a_minimum_move(self):
+        for key, spec in anomaly.WATCHED.items():
+            self.assertEqual(len(spec), 4, f"{key} is missing its threshold")
+            self.assertGreater(spec[3], 0, f"{key} has a zero threshold")
+
+    def test_findings_report_the_size_of_the_move(self):
+        rows = flat_history(sol_price=72.0)
+        found = anomaly.detect(rows, {"ts": 1, "sol_price": 40.0})
+        price = next(f for f in found if f["metric"] == "sol_price")
+        self.assertIsNotNone(price["change_pct"])
+        self.assertIn("%", price["detail"])
+
     def test_one_finding_per_metric(self):
         # A collapse trips the statistical layer and the absolute rule at once.
         rows = flat_history(tps=2800, slot_time_ms=420, delinquent_stake_pct=0.07)

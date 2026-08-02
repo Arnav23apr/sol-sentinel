@@ -28,26 +28,38 @@ MIN_BASELINE = 12     # need at least this many points before flagging
 Z_WARNING = 3.5
 Z_CRITICAL = 6.0
 
-# metric key in history -> (label, unit, direction of concern)
+# metric key -> (label, unit, direction of concern, minimum move worth
+# flagging as a percentage of the baseline).
+#
 # direction: "both" flags spikes and drops, "drop" / "spike" only one side.
+#
+# The minimum move is not optional padding, it is what keeps the z-score
+# honest. MAD shrinks toward zero on a metric that has been stable, so an
+# utterly trivial change divided by a near-zero scale produces an enormous
+# z-score: TVL moving 0.13%, from $4.7499B to $4.7559B, scored 415 sigma and
+# was published as CRITICAL. Statistical unusualness alone is not a reason to
+# wake anyone up; a finding has to clear both bars, be surprising *and* be
+# big enough to matter.
 WATCHED = {
-    "tps": ("Transactions per second", "tps", "drop"),
-    "true_tps": ("Non-vote TPS", "tps", "drop"),
-    "slot_time_ms": ("Average slot time", "ms", "spike"),
-    "validators_delinquent": ("Delinquent validators", "", "spike"),
-    "delinquent_stake_pct": ("Delinquent stake", "%", "spike"),
-    "sol_price": ("SOL price", "USD", "both"),
-    "tvl": ("DeFi TVL", "USD", "both"),
-    "stables": ("Stablecoin supply", "USD", "both"),
-    "dex_vol_24h": ("DEX volume (24h)", "USD", "both"),
-    "fees_24h": ("Network fees (24h)", "USD", "both"),
-    "activity_idx": ("Activity index (fee payers per block)", "", "both"),
+    "tps": ("Transactions per second", "tps", "drop", 20.0),
+    "true_tps": ("Non-vote TPS", "tps", "drop", 20.0),
+    "slot_time_ms": ("Average slot time", "ms", "spike", 15.0),
+    "validators_delinquent": ("Delinquent validators", "", "spike", 50.0),
+    # Delinquent stake sits near zero in normal operation, so a relative move
+    # is meaningless noise. Real trouble is caught by the absolute rule below.
+    "delinquent_stake_pct": ("Delinquent stake", "%", "spike", 200.0),
+    "sol_price": ("SOL price", "USD", "both", 5.0),
+    "tvl": ("DeFi TVL", "USD", "both", 5.0),
+    "stables": ("Stablecoin supply", "USD", "both", 3.0),
+    "dex_vol_24h": ("DEX volume (24h)", "USD", "both", 25.0),
+    "fees_24h": ("Network fees (24h)", "USD", "both", 25.0),
+    "activity_idx": ("Activity index (fee payers per block)", "", "both", 25.0),
     # Fees spiking is congestion worth flagging; fees falling is not an
     # incident, so this one is watched in the spike direction only.
-    "median_tx_fee": ("Median transaction fee", "lamports", "spike"),
+    "median_tx_fee": ("Median transaction fee", "lamports", "spike", 50.0),
     # A jump in failed transactions is what congestion feels like to a user,
     # so it is watched in the spike direction.
-    "failure_rate_pct": ("Median program failure rate", "%", "spike"),
+    "failure_rate_pct": ("Median program failure rate", "%", "spike", 30.0),
 }
 
 
@@ -74,7 +86,7 @@ def detect(rows: list[dict], latest: dict) -> list[dict]:
     now = int(time.time())
 
     # ---- Layer 1: statistical outliers ---------------------------------
-    for key, (label, unit, direction) in WATCHED.items():
+    for key, (label, unit, direction, min_change_pct) in WATCHED.items():
         value = latest.get(key)
         if value is None or isinstance(value, bool) or not isinstance(value, (int, float)):
             continue
@@ -89,33 +101,48 @@ def detect(rows: list[dict], latest: dict) -> list[dict]:
             continue
         if direction == "spike" and z < 0:
             continue
-        if abs(z) >= Z_WARNING:
-            med = statistics.median(window)
-            unit_s = (" " + unit) if unit else ""
-            direction = "above" if z > 0 else "below"
-            # A perfectly flat baseline (e.g. delinquency pinned at one value
-            # for days) gives an infinite z-score. Reporting "inf standard
-            # deviations" reads like a bug, so describe the move instead.
-            if math.isinf(z):
-                detail = (f"{label} moved off a previously constant baseline: "
-                          f"now {value:,.2f}{unit_s}, and it had been "
-                          f"{med:,.2f} for the whole 7-day window.")
-            else:
-                detail = (f"{label} is {abs(z):.1f} robust standard deviations "
-                          f"{direction} its 7-day baseline "
-                          f"(now {value:,.2f}{unit_s}, typical {med:,.2f}).")
-            findings.append({
-                "ts": now,
-                "metric": key,
-                "label": label,
-                "severity": "critical" if abs(z) >= Z_CRITICAL else "warning",
-                "kind": "spike" if z > 0 else "drop",
-                "value": value,
-                "baseline_median": med,
-                "z_score": None if math.isinf(z) else round(z, 2),
-                "unit": unit,
-                "detail": detail,
-            })
+        if abs(z) < Z_WARNING:
+            continue
+
+        med = statistics.median(window)
+        # Second bar: the move has to be big enough to act on. Without this a
+        # stable metric produces a huge z-score for a change nobody would
+        # notice, and every such alert spends the reader's trust in the ones
+        # that matter.
+        if med:
+            change_pct = abs(value - med) / abs(med) * 100
+            if change_pct < min_change_pct:
+                continue
+        else:
+            change_pct = None
+
+        unit_s = (" " + unit) if unit else ""
+        way = "above" if z > 0 else "below"
+        move = f" a {change_pct:.1f}% move" if change_pct is not None else ""
+        # A perfectly flat baseline (e.g. delinquency pinned at one value for
+        # days) gives an infinite z-score. Reporting "inf standard deviations"
+        # reads like a bug, so describe the move instead.
+        if math.isinf(z):
+            detail = (f"{label} moved off a previously constant baseline: "
+                      f"now {value:,.2f}{unit_s}, and it had been "
+                      f"{med:,.2f} for the whole 7-day window.")
+        else:
+            detail = (f"{label} is {abs(z):.1f} robust standard deviations "
+                      f"{way} its 7-day baseline:{move} to "
+                      f"{value:,.2f}{unit_s} from a typical {med:,.2f}.")
+        findings.append({
+            "ts": now,
+            "metric": key,
+            "label": label,
+            "severity": "critical" if abs(z) >= Z_CRITICAL else "warning",
+            "kind": "spike" if z > 0 else "drop",
+            "value": value,
+            "baseline_median": med,
+            "z_score": None if math.isinf(z) else round(z, 2),
+            "change_pct": round(change_pct, 2) if change_pct is not None else None,
+            "unit": unit,
+            "detail": detail,
+        })
 
     # ---- Layer 2: absolute health rules --------------------------------
     def rule(cond: bool, metric: str, label: str, severity: str, detail: str,
