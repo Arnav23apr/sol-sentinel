@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Sol Sentinel · Solana Ecosystem Dashboard</title>
+    <meta
+      name="description"
+      content="Auto-updating Solana ecosystem dashboard: network performance, validators, economics, DeFi, tokenized assets, development and news. Collected with Python's standard library alone, from public endpoints that need no API keys."
+    />
+    <meta property="og:title" content="Sol Sentinel · Solana Ecosystem Dashboard" />
+    <meta
+      property="og:description"
+      content="Keyless, dependency-free Solana ecosystem monitor. Refreshes every 30 minutes."
+    />
+    <meta property="og:type" content="website" />
+    <!-- Paint the page background before React mounts so a reload never
+         flashes white on the way to the dark dashboard. -->
+    <style>
+      html { background: #08090a; }
+      html[data-theme="light"] { background: #f4f3ef; }
+    </style>
+    <script>
+      try {
+        var t = localStorage.getItem("sentinel-theme");
+        if (t) document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
