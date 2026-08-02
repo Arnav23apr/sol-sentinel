@@ -16,6 +16,7 @@ the report can show *why* something was flagged, not just that it was.
 """
 from __future__ import annotations
 
+import math
 import statistics
 import time
 from typing import Optional
@@ -84,6 +85,19 @@ def detect(rows: list[dict], latest: dict) -> list[dict]:
             continue
         if abs(z) >= Z_WARNING:
             med = statistics.median(window)
+            unit_s = (" " + unit) if unit else ""
+            direction = "above" if z > 0 else "below"
+            # A perfectly flat baseline (e.g. delinquency pinned at one value
+            # for days) gives an infinite z-score. Reporting "inf standard
+            # deviations" reads like a bug, so describe the move instead.
+            if math.isinf(z):
+                detail = (f"{label} moved off a previously constant baseline: "
+                          f"now {value:,.2f}{unit_s}, and it had been "
+                          f"{med:,.2f} for the whole 7-day window.")
+            else:
+                detail = (f"{label} is {abs(z):.1f} robust standard deviations "
+                          f"{direction} its 7-day baseline "
+                          f"(now {value:,.2f}{unit_s}, typical {med:,.2f}).")
             findings.append({
                 "ts": now,
                 "metric": key,
@@ -92,12 +106,9 @@ def detect(rows: list[dict], latest: dict) -> list[dict]:
                 "kind": "spike" if z > 0 else "drop",
                 "value": value,
                 "baseline_median": med,
-                "z_score": round(z, 2),
+                "z_score": None if math.isinf(z) else round(z, 2),
                 "unit": unit,
-                "detail": (f"{label} is {abs(z):.1f} robust standard deviations "
-                           f"{'above' if z > 0 else 'below'} its 7-day baseline "
-                           f"(now {value:,.2f}{(' ' + unit) if unit else ''}, "
-                           f"typical {med:,.2f})."),
+                "detail": detail,
             })
 
     # ---- Layer 2: absolute health rules --------------------------------
@@ -111,15 +122,15 @@ def detect(rows: list[dict], latest: dict) -> list[dict]:
     tps = latest.get("tps")
     rule(isinstance(tps, (int, float)) and tps < 1000, "tps",
          "Network throughput", "critical",
-         f"Total TPS at {tps:,.0f} — far below normal mainnet levels; possible "
+         f"Total TPS at {tps:,.0f}, far below normal mainnet levels; possible "
          f"degradation or an RPC reporting artifact." if isinstance(tps, (int, float)) else "",
          tps)
 
     slot_ms = latest.get("slot_time_ms")
     rule(isinstance(slot_ms, (int, float)) and slot_ms > 600, "slot_time_ms",
          "Slot time", "warning",
-         f"Average slot time {slot_ms:.0f} ms (target ~400 ms) — blocks are "
-         f"landing slowly." if isinstance(slot_ms, (int, float)) else "",
+         f"Average slot time {slot_ms:.0f} ms against a 400 ms target: blocks "
+         f"are landing slowly." if isinstance(slot_ms, (int, float)) else "",
          slot_ms)
 
     dq_pct = latest.get("delinquent_stake_pct")
@@ -136,5 +147,25 @@ def detect(rows: list[dict], latest: dict) -> list[dict]:
              f"SOL moved {chg:+.1f}% in 24h.", chg)
 
     order = {"critical": 0, "warning": 1, "info": 2}
-    findings.sort(key=lambda f: (order.get(f["severity"], 3), f["metric"]))
-    return findings
+
+    # A bad enough move trips both layers for the same metric (TPS collapsing
+    # is simultaneously a 100-sigma outlier and below the absolute floor).
+    # Emitting both double-counts one incident, so keep one finding per
+    # metric: the more severe, and on a tie the threshold rule, whose text
+    # says what the number means rather than how unusual it is.
+    def rank(f: dict) -> tuple:
+        return (order.get(f["severity"], 3), 0 if f["kind"] == "threshold" else 1)
+
+    best: dict[str, dict] = {}
+    for f in findings:
+        current = best.get(f["metric"])
+        if current is None or rank(f) < rank(current):
+            if current is not None:
+                f = {**f, "also_flagged_by": current["kind"]}
+            best[f["metric"]] = f
+        else:
+            best[f["metric"]] = {**current, "also_flagged_by": f["kind"]}
+
+    merged = list(best.values())
+    merged.sort(key=lambda f: (order.get(f["severity"], 3), f["metric"]))
+    return merged

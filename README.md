@@ -24,6 +24,14 @@ python3 -m sentinel.main --serve 8080 # serve docs/ with background refresh
 
 Requires Python 3.9+. That is the whole setup for the data side.
 
+The test suite is standard-library `unittest` and runs offline against fixtures and stubs, so it needs no network and no keys:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+It covers the anomaly math and its direction filters, the key contract between `history.py` and `anomaly.py` (a typo on either side would silently stop a metric from ever alerting), per-source error isolation including the stale-fallback path, RSS and Atom parsing, and number formatting. It runs on every scheduled collection, so a regression fails the run before a bad report can be published.
+
 The dashboard is a separate Vite + React app in [`dashboard/`](dashboard) that reads the collector's JSON. Its build output is committed to `docs/`, so **you only need Node if you want to change the dashboard itself**:
 
 ```bash
@@ -78,6 +86,8 @@ Two layers run on every snapshot (see [`sentinel/anomaly.py`](sentinel/anomaly.p
 1. **Robust statistical outliers.** Each watched metric (TPS, non-vote TPS, slot time, delinquent validators and stake, SOL price, TVL, stablecoin supply, DEX volume, fees, activity index) is compared to its rolling 7-day baseline using median absolute deviation. A MAD z-score at |z| >= 3.5 raises a warning and |z| >= 6 raises critical. MAD is used instead of mean and standard deviation so one bad sample from a free endpoint cannot poison the baseline. Direction is respected: TPS alerts only on drops, slot time and delinquency only on spikes, prices and volumes on both.
 2. **Absolute health rules.** Thresholds that matter regardless of history: TPS below 1,000, slot time above 600 ms, delinquent stake above 5% (critical above 10%), and SOL moving more than 10% in 24h (critical at 20%).
 
+A serious incident trips both layers at once (collapsing TPS is simultaneously a 100-sigma outlier and below the absolute floor), so findings are merged to one per metric, keeping the more severe and, on a tie, the threshold rule, whose wording says what the number means rather than how unusual it is. The surviving finding records that the other layer also fired.
+
 Every finding carries its evidence (value, baseline median, z-score) into all three outputs, so an alert is always explainable.
 
 ## Measured on-chain activity (methodology)
@@ -92,7 +102,7 @@ Both numbers, the per-block series, and the sample count are in the JSON output.
 ## Repository layout
 
 ```
-sentinel/               the collector — Python standard library only
+sentinel/               the collector: Python standard library only
   net.py                HTTP core: timeouts, retries, ETag, fallback chains
   collect_rpc.py        network + validator metrics via JSON-RPC
   collect_market.py     price data with a 4-source fallback chain
@@ -109,6 +119,7 @@ sentinel/               the collector — Python standard library only
 dashboard/              the interactive dashboard (Vite + React + dither-kit)
   src/App.tsx           the dashboard itself
   src/components/       shell primitives + vendored dither-kit chart engine
+tests/                  stdlib unittest suite (no network, no keys)
 data/                   history.jsonl + latest.json, committed by the bot
 docs/                   published outputs (GitHub Pages root)
 samples/                example report.md / report.json

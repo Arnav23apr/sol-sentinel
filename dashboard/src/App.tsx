@@ -416,7 +416,7 @@ export default function App() {
                 <code className="text-[12px]">{shortKey(x.vote)}</code>,
                 num(x.stake_sol),
                 pct(x.share_pct),
-                `${x.commission ?? "—"}%`,
+                `${x.commission ?? "-"}%`,
               ])}
             />
           </Card>
@@ -636,7 +636,7 @@ export default function App() {
                   ? num(a.active_cohort_est)
                   : a.cohort_lower_bound != null
                     ? `≥${num(a.cohort_lower_bound)}`
-                    : "—"
+                    : "-"
               }
               sub="capture-recapture estimate"
             />

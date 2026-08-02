@@ -10,26 +10,26 @@ const compact = (v: number, digits: number) => {
 }
 
 export const num = (v: Num, digits = 1) =>
-  v == null ? "—" : compact(v, digits)
+  v == null ? "-" : compact(v, digits)
 
 export const usd = (v: Num, digits = 2) => {
-  if (v == null) return "—"
+  if (v == null) return "-"
   const a = Math.abs(v)
   if (a < 1000) return `$${v.toFixed(2)}`
   return `$${compact(v, digits)}`
 }
 
 export const pct = (v: Num, signed = false) => {
-  if (v == null) return "—"
+  if (v == null) return "-"
   const sign = signed && v > 0 ? "+" : ""
   return `${sign}${v.toFixed(2)}%`
 }
 
-export const int = (v: Num) => (v == null ? "—" : v.toLocaleString())
+export const int = (v: Num) => (v == null ? "-" : v.toLocaleString())
 
 export const day = (ts: Num) =>
   ts == null
-    ? "—"
+    ? "-"
     : new Date(ts * 1000).toLocaleDateString(undefined, {
         month: "short",
         day: "numeric",
@@ -37,7 +37,7 @@ export const day = (ts: Num) =>
 
 export const time = (ts: Num) =>
   ts == null
-    ? "—"
+    ? "-"
     : new Date(ts * 1000).toLocaleString(undefined, {
         month: "short",
         day: "numeric",
@@ -46,7 +46,7 @@ export const time = (ts: Num) =>
       })
 
 export const shortKey = (k?: string | null) =>
-  k ? `${k.slice(0, 4)}…${k.slice(-4)}` : "—"
+  k ? `${k.slice(0, 4)}…${k.slice(-4)}` : "-"
 
 /** Down-sample a series to at most `max` points, always keeping the last one
  * so the newest value is never dropped off the end of a sparkline. */
