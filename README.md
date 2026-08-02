@@ -81,6 +81,8 @@ Splitting them keeps the 30-minute loop to a bare Python run rather than a Node 
 
 The metric history behind trends and anomaly baselines lives in [`data/history.jsonl`](data/history.jsonl), one compact row per run, capped at about 90 days. Because the workflow commits it back, the repository itself is the database: no external storage, and anyone who clones the repo gets the full history.
 
+That does mean a local run can collide with the scheduled one. Only `history.jsonl` holds anything irreplaceable, so it is merged with `merge=union` (see [`.gitattributes`](.gitattributes)) — correct for an append-only log keyed by timestamp — and `history.load()` deduplicates by timestamp and skips stray conflict markers, since duplicate rows would quietly skew every rolling baseline. Everything else under `docs/` and `data/` is fully derived, so a conflict there carries no information; [`scripts/resolve-generated.sh`](scripts/resolve-generated.sh) resolves those and regenerates them.
+
 ## Anomaly detection
 
 Two layers run on every snapshot (see [`sentinel/anomaly.py`](sentinel/anomaly.py)):
