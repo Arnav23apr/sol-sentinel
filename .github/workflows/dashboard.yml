@@ -1,0 +1,54 @@
+name: Build dashboard
+
+# The dashboard is a Vite + React app that renders the collector's JSON with
+# dither-kit charts. Its build output is committed to docs/, so this only needs
+# to run when the dashboard source changes, never on the 30-minute data loop.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "dashboard/**"
+      - ".github/workflows/dashboard.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-main
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install
+        working-directory: dashboard
+        run: npm ci
+
+      - name: Build into docs/
+        working-directory: dashboard
+        run: npm run build
+
+      - name: Commit built dashboard
+        run: |
+          git config user.name "sol-sentinel[bot]"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git commit -m "build: dashboard $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git pull --rebase origin main
+          git push origin main

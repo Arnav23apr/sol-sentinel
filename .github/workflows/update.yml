@@ -1,0 +1,55 @@
+name: Refresh data
+
+# The 30-minute loop runs the Python collector only. It has no dependencies to
+# install and no build step, so a routine refresh is just checkout + run.
+# Rebuilding the dashboard is a separate workflow, triggered by dashboard
+# source changes.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "sentinel/**"
+      - ".github/workflows/update.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-main
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # No pip install anywhere: the collector and its tests are Python
+      # standard library only.
+      - name: Test
+        run: python -m unittest discover -s tests
+
+      - name: Collect and render reports
+        run: python -m sentinel.main --once
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name "sol-sentinel[bot]"
+          git config user.email "actions@users.noreply.github.com"
+          git add data docs
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git commit -m "chore: refresh snapshot $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git pull --rebase origin main
+          git push origin main
