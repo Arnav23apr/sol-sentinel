@@ -68,6 +68,32 @@ def _filled(row: dict) -> int:
     return sum(1 for v in row.values() if v is not None)
 
 
+MIN_RATE_SPAN_SECS = 600  # short spans are dominated by timing jitter
+
+
+def blocks_per_day(rows: list[dict]) -> Optional[float]:
+    """Measured block-production rate, from how far block height actually
+    advanced between two runs.
+
+    Solana's nominal 400 ms slot implies 216,000 blocks a day, but real slot
+    time runs slightly long and a few slots are skipped, so mainnet lands
+    nearer 205,000. Anything extrapolated from a per-block figure has to use
+    the measured rate or it inherits that 5% error. Returns None until two
+    runs far enough apart exist.
+    """
+    usable = [r for r in rows
+              if isinstance(r.get("block_height"), (int, float))
+              and isinstance(r.get("ts"), (int, float))]
+    if len(usable) < 2:
+        return None
+    first, last = usable[0], usable[-1]
+    span = last["ts"] - first["ts"]
+    blocks = last["block_height"] - first["block_height"]
+    if span < MIN_RATE_SPAN_SECS or blocks <= 0:
+        return None
+    return blocks / span * 86400
+
+
 def series(rows: list[dict], key: str) -> list[tuple[float, float]]:
     """Extract (timestamp, value) pairs for one metric, skipping gaps."""
     out = []

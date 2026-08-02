@@ -46,6 +46,7 @@ export type Network = {
   p90_prioritization_fee?: number
   max_prioritization_fee?: number
   prio_fee_nonzero_pct?: number
+  blocks_per_day_measured?: number
   inflation_total_pct?: number
   inflation_validator_pct?: number
   inflation_terminal_pct?: number
@@ -132,9 +133,8 @@ export type Activity = {
   base_fee_only_pct?: number
   fee_sampled_txs?: number
   avg_fees_per_block_sol?: number
-  measured_daily_fees_sol?: number
-  measured_daily_fees_sol_low?: number
-  measured_daily_fees_sol_high?: number
+  fees_per_block_sol_low?: number
+  fees_per_block_sol_high?: number
 }
 
 export type CrossCheck = {
@@ -149,6 +149,8 @@ export type CrossCheck = {
   agrees: boolean
   tolerance_pct?: number
   a_interval_95?: [number, number]
+  ratio?: number | null
+  blocks_per_day?: number
   basis?: string
 }
 

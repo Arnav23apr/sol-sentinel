@@ -105,25 +105,21 @@ def _fee_stats(user_fees: list, block_totals: list) -> dict:
     if block_totals:
         avg_per_block = sum(block_totals) / len(block_totals)
         out["avg_fees_per_block_sol"] = round(avg_per_block / LAMPORTS, 6)
-        # Extrapolated to a day so it can be cross-checked against the figure
-        # DeFiLlama reports for the same window (see crosscheck.py).
-        daily = avg_per_block / LAMPORTS * SLOTS_PER_DAY
-        out["measured_daily_fees_sol"] = round(daily)
-        # Eight blocks out of ~216,000 is a small sample of a heavy-tailed
-        # quantity, so the point estimate alone would imply false precision.
-        # Carry a 95% interval (Student t, n-1 df) so the cross-check can ask
-        # the statistically meaningful question -- does the other source's
-        # number fall inside our interval? -- instead of comparing against an
-        # arbitrary tolerance.
+        # Reported per block, not per day. Turning this into a daily figure
+        # needs the real block-production rate, which the collector measures
+        # from consecutive runs rather than assuming; crosscheck.py does the
+        # extrapolation. Baking in a slots-per-day constant here overstated
+        # the total by about 5%, since mainnet runs nearer 205,000 blocks a
+        # day than the 216,000 a 400 ms slot would imply.
         n = len(block_totals)
         if n >= 3:
-            mean = avg_per_block
-            var = sum((x - mean) ** 2 for x in block_totals) / (n - 1)
+            var = sum((x - avg_per_block) ** 2 for x in block_totals) / (n - 1)
             stderr = (var ** 0.5) / (n ** 0.5)
-            t = T_95.get(n - 1, 1.96)
-            margin = t * stderr / LAMPORTS * SLOTS_PER_DAY
-            out["measured_daily_fees_sol_low"] = round(max(0.0, daily - margin))
-            out["measured_daily_fees_sol_high"] = round(daily + margin)
+            margin = T_95.get(n - 1, 1.96) * stderr
+            out["fees_per_block_sol_low"] = round(
+                max(0.0, avg_per_block - margin) / LAMPORTS, 6)
+            out["fees_per_block_sol_high"] = round(
+                (avg_per_block + margin) / LAMPORTS, 6)
     return out
 
 

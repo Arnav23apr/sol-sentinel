@@ -1,10 +1,10 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-02 20:56 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-02 21:03 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
-- 🟠 **Chain fees (24h): sources disagree** (warning): sampled blocks (RPC) reports 321,853 USD while DeFiLlama reports 424,805 USD, outside the 228,970 to 414,662 USD 95% interval our sample supports. Treat this figure as uncertain until they reconverge.
+- 🟢 No anomalies detected. All watched metrics are within their 7-day baselines and absolute health thresholds.
 
 ## Network performance
 
@@ -13,17 +13,17 @@
 | RPC health | ok |
 | TPS (total, 10-min median) | 3.4K |
 | TPS (non-vote) | 1.8K |
-| Slot time | 419.6 ms |
+| Slot time | 421.1 ms |
 | Slot | 437M |
 | Block height | 415M |
-| Epoch | 1011 (19.97% complete, ~40.3h remaining) |
+| Epoch | 1011 (20.18% complete, ~40.3h remaining) |
 | Lifetime transactions | 534.5B |
 | Circulating supply | 581.2M SOL |
 | Inflation (annual) | 3.71% |
-| Median transaction fee | 5,565 lamports (about $0.00041) |
-| Transaction fee p90 / p99 | 26,717 / 470,966 lamports |
-| Paying base fee only | 19.10% of 4,774 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 12.70% of slots needed a priority fee (max 2.7M µlam/CU) |
+| Median transaction fee | 5,203 lamports (about $0.00038) |
+| Transaction fee p90 / p99 | 16,820 / 605,000 lamports |
+| Paying base fee only | 27.10% of 4,289 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 9.30% of slots needed a priority fee (max 2.7M µlam/CU) |
 | Node version (RPC) | 4.1.0 |
 
 ## Validators & decentralization
@@ -58,10 +58,10 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $73.60 (+3.50% 24h) |
-| Market cap | $42.78B (rank #7) |
-| 24h volume | $1.03B |
-| ATH | $293.31 (-74.91% from ATH) |
+| SOL price | $73.62 (+3.40% 24h) |
+| Market cap | $42.79B (rank #7) |
+| 24h volume | $1.02B |
+| ATH | $293.31 (-74.90% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
@@ -94,12 +94,12 @@
 | DEX | 24h volume |
 |---|---|
 | PumpSwap | $642.34M |
-| Orca DEX | $68.21M |
+| Orca DEX | $77.40M |
 | BisonFi | $63.19M |
 | pump.fun | $61.18M |
 | GoonFi | $59.95M |
-| Manifest Trade | $58.75M |
-| Meteora DLMM | $58.09M |
+| Manifest Trade | $58.17M |
+| Meteora DLMM | $56.27M |
 | Axiom | $41.95M |
 
 ### Top apps by 24h fees
@@ -119,11 +119,11 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 242 |
-| Persistently-active cohort (capture-recapture est.) | 2.5K |
-| Unique payers across sampled blocks | 1.4K (8 blocks over 24h) |
+| Activity index: unique fee payers per block (24h sampled avg) | 246 |
+| Persistently-active cohort (capture-recapture est.) | 2.8K |
+| Unique payers across sampled blocks | 1.5K (8 blocks over 24h) |
 | xStocks tokenized-equity AUM | $347.25M |
-| xStocks 24h DEX volume | $2.71M |
+| xStocks 24h DEX volume | $2.66M |
 | xStocks holders | 245.7K |
 | Total RWA TVL on Solana | $1.76B |
 
@@ -131,12 +131,12 @@ Top tokenized equities: TSLAX ($58.67M), CRCLX ($45.64M), SPYX ($43.35M), MSTRX 
 
 ## Cross-source validation
 
-Quantities that two independent sources can both see, compared against each other. 2 of 3 agree this run.
+Quantities that two independent sources can both see, compared against each other. 3 of 3 agree this run.
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 321.85K USD | DeFiLlama: 424.81K USD | -27.58% | **diverge** (95% CI 229K to 415K) |
-| SOL price | coingecko: 73.60 USD | Jupiter (on-chain DEX): 73.64 USD | -0.05% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 268.17K USD | DeFiLlama: 424.81K USD | -45.21% | agree (95% CI 143K to 393K) |
+| SOL price | coingecko: 73.62 USD | Jupiter (on-chain DEX): 73.67 USD | -0.07% | agree |
 | Circulating supply | getSupply (RPC): 581.19M SOL | CoinGecko: 581.19M SOL | -0.00% | agree |
 
 ## Protocol development

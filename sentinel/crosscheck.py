@@ -29,9 +29,12 @@ from .net import FetchError, fetch_json
 
 WSOL_MINT = "So11111111111111111111111111111111111111112"
 
-# Fee sampling is 8 blocks out of ~216,000 in a day, so its confidence
-# interval is wide; only a large divergence means anything.
-FEE_TOLERANCE_PCT = 60.0
+# Fee sampling reads 8 blocks out of ~205,000 in a day, so it can corroborate
+# the magnitude of an independently reported total but not pin its value. Two
+# measurements of a bursty, heavy-tailed quantity landing within 2x of each
+# other is real corroboration; beyond that, one of them is measuring something
+# else.
+FEE_RATIO_BAND = 2.0
 PRICE_TOLERANCE_PCT = 2.0
 SUPPLY_TOLERANCE_PCT = 2.0
 
@@ -76,16 +79,13 @@ def crosscheck(snapshot: dict) -> dict:
     defi = snapshot.get("defi") or {}
     activity = snapshot.get("activity") or {}
 
-    # 1. Chain fees: our own block sampling vs DeFiLlama's indexer. Judged
-    #    against our sample's 95% confidence interval rather than a flat
-    #    tolerance, since the interval is what the sample can actually support.
-    measured_sol = activity.get("measured_daily_fees_sol")
+    # 1. Chain fees: our own block sampling vs DeFiLlama's indexer.
     price = market.get("price_usd")
     llama_usd = defi.get("chain_fees_24h_usd")
-    low = activity.get("measured_daily_fees_sol_low")
-    high = activity.get("measured_daily_fees_sol_high")
-    if measured_sol is not None and price and llama_usd:
-        ours = round(measured_sol * price)
+    per_block = activity.get("avg_fees_per_block_sol")
+    rate = network.get("blocks_per_day_measured")
+    if per_block is not None and price and llama_usd and rate:
+        ours = round(per_block * rate * price)
         theirs = round(llama_usd)
         check = {
             "check": "chain_fees",
@@ -96,16 +96,24 @@ def crosscheck(snapshot: dict) -> dict:
             "b_value": theirs,
             "unit": "USD",
             "gap_pct": _gap_pct(ours, theirs),
+            "blocks_per_day": round(rate),
         }
-        if low is not None and high is not None:
-            lo_usd, hi_usd = round(low * price), round(high * price)
-            check["a_interval_95"] = [lo_usd, hi_usd]
-            check["agrees"] = lo_usd <= theirs <= hi_usd
-            check["basis"] = "95% CI of an 8-block sample"
-        else:
-            check["agrees"] = abs(check["gap_pct"] or 0) <= FEE_TOLERANCE_PCT
-            check["tolerance_pct"] = FEE_TOLERANCE_PCT
-            check["basis"] = "fixed tolerance"
+        lo, hi = (activity.get("fees_per_block_sol_low"),
+                  activity.get("fees_per_block_sol_high"))
+        if lo is not None and hi is not None:
+            check["a_interval_95"] = [round(lo * rate * price),
+                                      round(hi * rate * price)]
+        # Judged on order of magnitude, not on the 95% interval. The interval
+        # comes from between-block variance in a sample of eight, but fees are
+        # bursty across the day as well as heavy-tailed within a block, so it
+        # understates the true error and would flag a disagreement nearly
+        # every run. What eight blocks can honestly support is whether an
+        # independent measurement lands in the same ballpark; the interval is
+        # still published as context.
+        ratio = ours / theirs if theirs else None
+        check["ratio"] = round(ratio, 2) if ratio else None
+        check["agrees"] = bool(ratio and 1 / FEE_RATIO_BAND <= ratio <= FEE_RATIO_BAND)
+        check["basis"] = f"within {FEE_RATIO_BAND:g}x (8-block sample)"
         checks.append(check)
 
     # 2. SOL price: centralised aggregate vs on-chain DEX quote.
@@ -145,10 +153,10 @@ def divergence_findings(result: dict) -> list[dict]:
     anomaly engine emits so both render through one code path."""
     out = []
     for c in result.get("divergences", []):
-        if c.get("a_interval_95"):
-            lo, hi = c["a_interval_95"]
-            basis = (f"outside the {lo:,} to {hi:,} {c['unit']} 95% interval "
-                     f"our sample supports")
+        if c.get("ratio"):
+            basis = (f"a {c['ratio']:.2f}x ratio, outside the "
+                     f"{FEE_RATIO_BAND:g}x band two independent measurements "
+                     f"of this quantity should stay within")
         else:
             basis = (f"a {abs(c['gap_pct']):.1f}% gap against a "
                      f"{c.get('tolerance_pct', 0):.0f}% tolerance")

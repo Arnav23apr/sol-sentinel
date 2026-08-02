@@ -85,6 +85,14 @@ def collect(verbose: bool = True) -> dict:
         m["market_cap_usd"] = round(m["price_usd"] * n["supply"]["circulating_sol"])
         m["market_cap_estimated"] = True
 
+    # Block-production rate measured from how far block height advanced
+    # between runs. Anything extrapolated from a per-block figure needs this
+    # rather than a nominal slots-per-day constant, which runs ~5% high.
+    prior_rows = history.load()
+    rate = history.blocks_per_day(prior_rows)
+    if rate and isinstance(snapshot.get("network"), dict):
+        snapshot["network"]["blocks_per_day_measured"] = round(rate)
+
     # Cross-source validation: compare independently-sourced views of the same
     # quantity. Divergences become findings alongside the anomalies.
     try:
@@ -104,7 +112,7 @@ def collect(verbose: bool = True) -> dict:
     # variance, and the first real reading after recovery would then look like
     # an infinite-sigma anomaly caused purely by the outage.
     row = history.headline_row(snapshot, stale=snapshot["stale_sections"])
-    rows = history.load()
+    rows = prior_rows
     snapshot["anomalies"] = (
         anomaly.detect(rows, row)
         + crosscheck.divergence_findings(snapshot["crosscheck"]))

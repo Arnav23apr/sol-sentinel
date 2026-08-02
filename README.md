@@ -102,7 +102,11 @@ Most of this report takes each number on faith from whichever endpoint served it
 | SOL price | CoinGecko, aggregating centralised venues | Jupiter, quoting the on-chain DEX price |
 | Circulating supply | `getSupply` from the chain | CoinGecko's published figure |
 
-The fee comparison is the interesting one, because a flat tolerance would be arbitrary. Sentinel samples 8 blocks out of roughly 216,000 in a day, of a heavy-tailed quantity, so it computes a 95% confidence interval from the per-block variance (Student t, hardcoded critical values since SciPy is not available under the stdlib-only rule) and asks the question the sample can actually answer: does the other source's number fall inside our interval? Price and supply use tight relative tolerances, since those are near-exact quantities where a real gap is meaningful, on-chain-versus-centralised price divergence being a genuine market condition rather than noise.
+The fee comparison is the interesting one, and it took two corrections to get honest.
+
+First, extrapolating a per-block figure to a day needs the real block-production rate. Solana's nominal 400 ms slot implies 216,000 blocks a day, but slot time runs slightly long and a few slots are skipped, so mainnet lands nearer 205,000. Sentinel measures the rate from how far block height actually advances between runs rather than assuming it, which removes a systematic 5% overstatement. Until two runs far enough apart exist, the check is skipped rather than guessed.
+
+Second, the agreement test is a ratio band, not a confidence interval. Sentinel does compute a 95% interval from between-block variance and publishes it as context, but it deliberately does not judge agreement on it: fees are bursty across the day as well as heavy-tailed within a block, so an interval built from eight blocks understates the true error and flagged a disagreement on nearly every run. What eight blocks can honestly support is whether an independent measurement lands in the same ballpark, so the check asks whether the two are within 2x. Price and supply use tight relative tolerances instead, since those are near-exact quantities where a real gap is meaningful, on-chain-versus-centralised price divergence being a genuine market condition rather than noise.
 
 Divergences are raised as warnings in the same shape as anomalies, so they render through one code path in all three outputs.
 

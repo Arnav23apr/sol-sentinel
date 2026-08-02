@@ -218,6 +218,22 @@ class TestHistoryContract(unittest.TestCase):
                         '{"ts":2,"tps":200}\n>>>>>>> other\n')
             self.assertEqual([r["tps"] for r in history.load(path)], [100, 200])
 
+    def test_block_rate_is_measured_from_height_advance(self):
+        # 205,000 blocks/day = 2.3727 blocks/sec; over 3600s that is 8541.
+        rows = [{"ts": 0, "block_height": 1_000_000},
+                {"ts": 3600, "block_height": 1_008_541}]
+        self.assertAlmostEqual(history.blocks_per_day(rows), 205_000, delta=50)
+
+    def test_block_rate_needs_a_long_enough_span(self):
+        # Two runs a minute apart are dominated by timing jitter.
+        rows = [{"ts": 0, "block_height": 1_000_000},
+                {"ts": 60, "block_height": 1_000_142}]
+        self.assertIsNone(history.blocks_per_day(rows))
+
+    def test_block_rate_is_none_without_history(self):
+        self.assertIsNone(history.blocks_per_day([]))
+        self.assertIsNone(history.blocks_per_day([{"ts": 0, "block_height": 1}]))
+
     def test_rows_come_back_in_timestamp_order(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "history.jsonl")
@@ -332,42 +348,66 @@ class TestCrossCheck(unittest.TestCase):
     quantity. These run offline by supplying both readings directly."""
 
     def snapshot(self, **over):
+        # 0.05 SOL/block x 200,000 blocks x $70 = $700,000/day measured.
         base = {
-            "network": {"supply": {"circulating_sol": 581_000_000}},
+            "network": {"supply": {"circulating_sol": 581_000_000},
+                        "blocks_per_day_measured": 200_000},
             "market": {"price_usd": 70.0, "source": "jupiter",
                        "circulating_supply": 581_000_000},
-            "defi": {"chain_fees_24h_usd": 400_000},
-            "activity": {"measured_daily_fees_sol": 5_000,
-                         "measured_daily_fees_sol_low": 3_000,
-                         "measured_daily_fees_sol_high": 7_000},
+            "defi": {"chain_fees_24h_usd": 700_000},
+            "activity": {"avg_fees_per_block_sol": 0.05,
+                         "fees_per_block_sol_low": 0.03,
+                         "fees_per_block_sol_high": 0.07},
         }
         for k, v in over.items():
             base.setdefault(k, {}).update(v)
         return base
 
-    def test_agrees_when_the_other_source_falls_inside_the_interval(self):
-        # Our interval is 3,000-7,000 SOL at $70 = $210k-$490k; llama says
-        # $400k, which is inside.
+    def test_agrees_when_both_measurements_are_the_same_size(self):
         res = crosscheck.crosscheck(self.snapshot())
         fees = next(c for c in res["checks"] if c["check"] == "chain_fees")
         self.assertTrue(fees["agrees"])
-        self.assertEqual(fees["a_interval_95"], [210_000, 490_000])
+        self.assertEqual(fees["a_value"], 700_000)
+        self.assertEqual(fees["ratio"], 1.0)
         self.assertEqual(res["divergences"], [])
 
-    def test_diverges_when_the_other_source_falls_outside(self):
+    def test_uses_the_measured_block_rate_not_a_constant(self):
+        # Halving the production rate must halve the extrapolated total.
         res = crosscheck.crosscheck(
-            self.snapshot(defi={"chain_fees_24h_usd": 2_000_000}))
+            self.snapshot(network={"blocks_per_day_measured": 100_000}))
+        fees = next(c for c in res["checks"] if c["check"] == "chain_fees")
+        self.assertEqual(fees["a_value"], 350_000)
+
+    def test_a_moderate_gap_still_corroborates(self):
+        # 30% apart is well within what an 8-block sample can resolve, so
+        # flagging it would cry wolf on nearly every run.
+        res = crosscheck.crosscheck(
+            self.snapshot(defi={"chain_fees_24h_usd": 1_000_000}))
+        fees = next(c for c in res["checks"] if c["check"] == "chain_fees")
+        self.assertTrue(fees["agrees"])
+
+    def test_diverges_when_the_two_are_orders_apart(self):
+        res = crosscheck.crosscheck(
+            self.snapshot(defi={"chain_fees_24h_usd": 10_000_000}))
         fees = next(c for c in res["checks"] if c["check"] == "chain_fees")
         self.assertFalse(fees["agrees"])
         self.assertEqual(len(res["divergences"]), 1)
 
+    def test_skipped_when_the_block_rate_is_not_known_yet(self):
+        # On a first-ever run there is no history to measure the rate from,
+        # and guessing a constant is what produced a 5% error before.
+        snap = self.snapshot()
+        del snap["network"]["blocks_per_day_measured"]
+        res = crosscheck.crosscheck(snap)
+        self.assertFalse(any(c["check"] == "chain_fees" for c in res["checks"]))
+
     def test_a_divergence_becomes_a_finding(self):
         res = crosscheck.crosscheck(
-            self.snapshot(defi={"chain_fees_24h_usd": 2_000_000}))
+            self.snapshot(defi={"chain_fees_24h_usd": 10_000_000}))
         findings = crosscheck.divergence_findings(res)
         self.assertEqual(len(findings), 1)
         self.assertEqual(findings[0]["severity"], "warning")
-        self.assertIn("95% interval", findings[0]["detail"])
+        self.assertIn("x band", findings[0]["detail"])
         # Must match the anomaly finding shape so both render identically.
         for key in ("metric", "label", "severity", "kind", "detail"):
             self.assertIn(key, findings[0])
@@ -406,14 +446,20 @@ class TestFeeStats(unittest.TestCase):
     def test_confidence_interval_brackets_the_estimate(self):
         out = collect_activity._fee_stats([], [10**9, 12**8, 11**8, 9**8,
                                                10**8, 13**8, 8**8, 10**8])
-        self.assertLessEqual(out["measured_daily_fees_sol_low"],
-                             out["measured_daily_fees_sol"])
-        self.assertGreaterEqual(out["measured_daily_fees_sol_high"],
-                                out["measured_daily_fees_sol"])
+        self.assertLessEqual(out["fees_per_block_sol_low"],
+                             out["avg_fees_per_block_sol"])
+        self.assertGreaterEqual(out["fees_per_block_sol_high"],
+                                out["avg_fees_per_block_sol"])
 
     def test_interval_is_omitted_when_the_sample_is_too_small(self):
         out = collect_activity._fee_stats([], [10**9, 10**9])
-        self.assertNotIn("measured_daily_fees_sol_low", out)
+        self.assertNotIn("fees_per_block_sol_low", out)
+
+    def test_no_daily_extrapolation_is_baked_in(self):
+        # Extrapolating here would have to assume a blocks-per-day constant;
+        # the measured rate lives in history and is applied in crosscheck.
+        out = collect_activity._fee_stats([], [10**9] * 8)
+        self.assertNotIn("measured_daily_fees_sol", out)
 
     def test_no_samples_yields_no_claims(self):
         self.assertEqual(collect_activity._fee_stats([], []), {})

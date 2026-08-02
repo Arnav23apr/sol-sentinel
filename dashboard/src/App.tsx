@@ -730,6 +730,13 @@ export default function App() {
                 Quantities two independent sources can both observe, compared
                 against each other. Agreement is evidence a number is real;
                 disagreement is itself a finding, and is raised as an alert.
+                The fee row extrapolates an 8-block sample using the measured
+                block rate
+                {n.blocks_per_day_measured
+                  ? ` (${int(n.blocks_per_day_measured)} blocks/day)`
+                  : ""}
+                , so it is judged on landing within 2x rather than on a
+                precision the sample cannot support.
               </p>
               <Table
                 head={["Quantity", "Source A", "Source B", "Gap", "Verdict"]}
@@ -746,11 +753,7 @@ export default function App() {
                   c.agrees ? (
                     <span className="text-emerald-400">
                       agree
-                      {c.a_interval_95
-                        ? ` (within 95% CI ${num(c.a_interval_95[0])}–${num(
-                            c.a_interval_95[1]
-                          )})`
-                        : ""}
+                      {c.ratio ? ` (${c.ratio.toFixed(2)}x)` : ""}
                     </span>
                   ) : (
                     <span className="text-amber-400">diverge</span>
