@@ -1,43 +1,44 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-02 21:34 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-02 21:43 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
-- 🟢 No anomalies detected. All watched metrics are within their 7-day baselines and absolute health thresholds.
+- 🔴 **Delinquent stake** (critical): Delinquent stake is 10.8 robust standard deviations above its 7-day baseline (now 0.21 %, typical 0.14).
+- 🔴 **DeFi TVL** (critical): DeFi TVL is 415.3 robust standard deviations above its 7-day baseline (now 4,755,944,251.00 USD, typical 4,749,940,154.00).
 
 ## Network performance
 
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 3.7K |
-| TPS (non-vote) | 2.1K |
-| Slot time | 422.5 ms |
+| TPS (total, 10-min median) | 3.8K |
+| TPS (non-vote) | 2.2K |
+| Slot time | 428.6 ms |
 | Slot | 437M |
 | Block height | 415M |
-| Epoch | 1011 (21.19% complete, ~40.0h remaining) |
-| Lifetime transactions | 534.5B |
+| Epoch | 1011 (21.50% complete, ~40.4h remaining) |
+| Lifetime transactions | 534.6B |
 | Circulating supply | 581.2M SOL |
 | Inflation (annual) | 3.71% |
-| Median transaction fee | 5,635 lamports (about $0.00042) |
-| Transaction fee p90 / p99 | 25,000 / 605,000 lamports |
-| Paying base fee only | 20.70% of 5,422 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 14.70% of slots needed a priority fee (max 2.7M µlam/CU) |
+| Median transaction fee | 5,273 lamports (about $0.00039) |
+| Transaction fee p90 / p99 | 16,800 / 605,001 lamports |
+| Paying base fee only | 27.50% of 5,528 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 8.00% of slots needed a priority fee (max 513.7K µlam/CU) |
 | Node version (RPC) | 4.1.0 |
 
 ## Validators & decentralization
 
 | Metric | Value |
 |---|---|
-| Active validators | 690 |
-| Delinquent validators | 13 |
-| Delinquent stake | 0.14% |
-| Total active stake | 432.0M SOL |
+| Active validators | 689 |
+| Delinquent validators | 14 |
+| Delinquent stake | 0.21% |
+| Total active stake | 431.8M SOL |
 | Nakamoto coefficient | 18 |
-| Top-5 / Top-10 / Top-20 stake share | 15.46% / 24.45% / 35.76% |
+| Top-5 / Top-10 / Top-20 stake share | 15.47% / 24.46% / 35.78% |
 | Commission (stake-weighted, delegatable validators) | 3.81% |
-| Stake on private (100% commission) validators | 24.37% |
+| Stake on private (100% commission) validators | 24.38% |
 
 ### Top validators by stake
 
@@ -58,17 +59,17 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $73.73 (+3.40% 24h) |
-| Market cap | $42.85B (rank #7) |
+| SOL price | $73.71 (+3.40% 24h) |
+| Market cap | $42.84B (rank #7) |
 | 24h volume | $1.01B |
-| ATH | $293.31 (-74.86% from ATH) |
+| ATH | $293.31 (-74.87% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
 
 | Metric | Value |
 |---|---|
-| TVL | $4.75B |
+| TVL | $4.76B |
 | Stablecoin supply | $15.68B |
 | DEX volume (24h) | $1.30B (-23.14% 1d) |
 | App fees (24h, all protocols) | $5.72M |
@@ -119,31 +120,31 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 274 |
-| Persistently-active cohort (capture-recapture est.) | 3.2K |
+| Activity index: unique fee payers per block (24h sampled avg) | 290 |
+| Persistently-active cohort (capture-recapture est.) | 3.3K |
 | Unique payers across sampled blocks | 1.7K (8 blocks over 24h) |
-| xStocks tokenized-equity AUM | $347.55M |
-| xStocks 24h DEX volume | $3.17M |
+| xStocks tokenized-equity AUM | $347.25M |
+| xStocks 24h DEX volume | $3.27M |
 | xStocks holders | 245.7K |
 | Total RWA TVL on Solana | $1.76B |
 
-Top tokenized equities: TSLAX ($58.67M), CRCLX ($45.79M), SPYX ($43.37M), MSTRX ($35.22M), QQQX ($29.85M)
+Top tokenized equities: TSLAX ($58.67M), CRCLX ($45.64M), SPYX ($43.35M), MSTRX ($35.21M), QQQX ($29.83M)
 
 ## Program activity and chain health
 
-Chain clock drift: **+14.7 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
+Chain clock drift: **+15.9 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| SPL Token | 31,775 | 26.10% | 1.7 s |
-| Pump.fun | 31,527 | 85.40% | 1.7 s |
-| Jupiter v6 | 1,871 | 38.40% | 31.7 s |
-| Orca Whirlpools | 983 | 72.90% | 60.8 s |
-| Raydium AMM v4 | 754 | 28.80% | 79.4 s |
+| SPL Token | 52,287 (approx.) | 42.40% | 0.9 s |
+| Pump.fun | 38,311 | 89.20% | 1.3 s |
+| Jupiter v6 | 3,819 | 65.20% | 15.4 s |
+| Orca Whirlpools | 1,682 | 51.20% | 35.6 s |
+| Raydium AMM v4 | 626 | 28.20% | 94.7 s |
 
-Median failure rate across the sampled programs: **38.40%** (range 26.10% to 85.40%). This is a consistent trend signal across these five programs, not a chain-wide rate.
+Median failure rate across the sampled programs: **51.20%** (range 28.20% to 89.20%). This is a consistent trend signal across these five programs, not a chain-wide rate.
 
 Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **35.24 SOL**.
 
@@ -153,8 +154,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 387.40K USD | DeFiLlama: 424.81K USD | -9.21% | agree (95% CI 212K to 563K) |
-| SOL price | coingecko: 73.73 USD | Jupiter (on-chain DEX): 73.73 USD | 0.00% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 431.54K USD | DeFiLlama: 424.81K USD | +1.57% | agree (95% CI 236K to 627K) |
+| SOL price | coingecko: 73.71 USD | Jupiter (on-chain DEX): 73.96 USD | -0.34% | agree |
 | Circulating supply | getSupply (RPC): 581.19M SOL | CoinGecko: 581.19M SOL | -0.00% | agree |
 
 ## Protocol development
