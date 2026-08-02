@@ -16,9 +16,10 @@ from typing import Any, Optional
 
 USER_AGENT = "sol-sentinel/1.0 (+https://github.com/Arnav23apr/sol-sentinel)"
 
-# ETag cache: url -> (etag, cached_body). Lives for the process; the GitHub
-# Actions runner is fresh each run, so ETags mostly help --loop/--serve modes,
-# and keep GitHub API usage within unauthenticated limits (304s are free).
+# ETag cache: url -> (etag, cached_body). Process-lifetime only, so it helps
+# --loop and --serve, not the one-shot CI run. Note this saves bandwidth, not
+# quota: GitHub counts a 304 against the unauthenticated 60/hr limit just like
+# a 200, so the call budget in collect_dev.py assumes every request counts.
 _ETAG_CACHE: dict[str, tuple[str, Any]] = {}
 
 
