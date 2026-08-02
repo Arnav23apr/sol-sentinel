@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-02 21:03 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-02 21:05 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -11,19 +11,19 @@
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 3.4K |
-| TPS (non-vote) | 1.8K |
-| Slot time | 421.1 ms |
+| TPS (total, 10-min median) | 3.7K |
+| TPS (non-vote) | 2.0K |
+| Slot time | 416.7 ms |
 | Slot | 437M |
 | Block height | 415M |
-| Epoch | 1011 (20.18% complete, ~40.3h remaining) |
+| Epoch | 1011 (20.27% complete, ~39.9h remaining) |
 | Lifetime transactions | 534.5B |
 | Circulating supply | 581.2M SOL |
 | Inflation (annual) | 3.71% |
-| Median transaction fee | 5,203 lamports (about $0.00038) |
-| Transaction fee p90 / p99 | 16,820 / 605,000 lamports |
-| Paying base fee only | 27.10% of 4,289 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 9.30% of slots needed a priority fee (max 2.7M µlam/CU) |
+| Median transaction fee | 5,434 lamports (about $0.00040) |
+| Transaction fee p90 / p99 | 28,815 / 568,757 lamports |
+| Paying base fee only | 23.60% of 3,846 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 16.00% of slots needed a priority fee (max 47.1M µlam/CU) |
 | Node version (RPC) | 4.1.0 |
 
 ## Validators & decentralization
@@ -58,10 +58,10 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $73.62 (+3.40% 24h) |
-| Market cap | $42.79B (rank #7) |
-| 24h volume | $1.02B |
-| ATH | $293.31 (-74.90% from ATH) |
+| SOL price | $73.68 (+3.40% 24h) |
+| Market cap | $42.81B (rank #7) |
+| 24h volume | $1.01B |
+| ATH | $293.31 (-74.88% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
@@ -94,12 +94,12 @@
 | DEX | 24h volume |
 |---|---|
 | PumpSwap | $642.34M |
-| Orca DEX | $77.40M |
+| Orca DEX | $68.21M |
 | BisonFi | $63.19M |
 | pump.fun | $61.18M |
 | GoonFi | $59.95M |
-| Manifest Trade | $58.17M |
-| Meteora DLMM | $56.27M |
+| Manifest Trade | $58.75M |
+| Meteora DLMM | $58.09M |
 | Axiom | $41.95M |
 
 ### Top apps by 24h fees
@@ -119,11 +119,11 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 246 |
-| Persistently-active cohort (capture-recapture est.) | 2.8K |
-| Unique payers across sampled blocks | 1.5K (8 blocks over 24h) |
+| Activity index: unique fee payers per block (24h sampled avg) | 218 |
+| Persistently-active cohort (capture-recapture est.) | 2.2K |
+| Unique payers across sampled blocks | 1.3K (8 blocks over 24h) |
 | xStocks tokenized-equity AUM | $347.25M |
-| xStocks 24h DEX volume | $2.66M |
+| xStocks 24h DEX volume | $2.68M |
 | xStocks holders | 245.7K |
 | Total RWA TVL on Solana | $1.76B |
 
@@ -135,8 +135,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 268.17K USD | DeFiLlama: 424.81K USD | -45.21% | agree (95% CI 143K to 393K) |
-| SOL price | coingecko: 73.62 USD | Jupiter (on-chain DEX): 73.67 USD | -0.07% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 308.91K USD | DeFiLlama: 424.81K USD | -31.59% | agree (95% CI 166K to 452K) |
+| SOL price | coingecko: 73.68 USD | Jupiter (on-chain DEX): 73.70 USD | -0.03% | agree |
 | Circulating supply | getSupply (RPC): 581.19M SOL | CoinGecko: 581.19M SOL | -0.00% | agree |
 
 ## Protocol development
