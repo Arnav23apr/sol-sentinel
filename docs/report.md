@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-02 21:32 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-02 21:34 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -13,17 +13,17 @@
 | RPC health | ok |
 | TPS (total, 10-min median) | 3.7K |
 | TPS (non-vote) | 2.1K |
-| Slot time | 419.6 ms |
+| Slot time | 422.5 ms |
 | Slot | 437M |
 | Block height | 415M |
-| Epoch | 1011 (21.15% complete, ~39.7h remaining) |
+| Epoch | 1011 (21.19% complete, ~40.0h remaining) |
 | Lifetime transactions | 534.5B |
 | Circulating supply | 581.2M SOL |
 | Inflation (annual) | 3.71% |
-| Median transaction fee | 5,500 lamports (about $0.00041) |
-| Transaction fee p90 / p99 | 24,778 / 1,005,000 lamports |
-| Paying base fee only | 22.30% of 4,067 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 13.30% of slots needed a priority fee (max 38.5M µlam/CU) |
+| Median transaction fee | 5,635 lamports (about $0.00042) |
+| Transaction fee p90 / p99 | 25,000 / 605,000 lamports |
+| Paying base fee only | 20.70% of 5,422 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 14.70% of slots needed a priority fee (max 2.7M µlam/CU) |
 | Node version (RPC) | 4.1.0 |
 
 ## Validators & decentralization
@@ -73,8 +73,8 @@
 | DEX volume (24h) | $1.30B (-23.14% 1d) |
 | App fees (24h, all protocols) | $5.72M |
 | Chain fees (24h) | $424.81K |
-| Jito MEV tips (24h) | $88.87K |
-| **REV - Real Economic Value (24h)** | **$513.68K** (chain fees + MEV tips) |
+| Jito MEV tips (24h) | $88.68K |
+| **REV - Real Economic Value (24h)** | **$513.49K** (chain fees + MEV tips) |
 
 ### Top stablecoins on Solana
 
@@ -109,9 +109,9 @@
 | PumpSwap | $1.45M |
 | pump.fun | $1.01M |
 | Axiom | $749.63K |
+| Meteora DLMM | $171.60K |
 | Jupiter Perpetual Exchange | $159.93K |
 | fomo Wallet | $156.33K |
-| Meteora DLMM | $155.02K |
 | Phantom Wallet | $137.88K |
 | Jupiter Lend | $134.31K |
 
@@ -119,11 +119,11 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 233 |
-| Persistently-active cohort (capture-recapture est.) | 2.3K |
-| Unique payers across sampled blocks | 1.4K (8 blocks over 24h) |
+| Activity index: unique fee payers per block (24h sampled avg) | 274 |
+| Persistently-active cohort (capture-recapture est.) | 3.2K |
+| Unique payers across sampled blocks | 1.7K (8 blocks over 24h) |
 | xStocks tokenized-equity AUM | $347.55M |
-| xStocks 24h DEX volume | $3.15M |
+| xStocks 24h DEX volume | $3.17M |
 | xStocks holders | 245.7K |
 | Total RWA TVL on Solana | $1.76B |
 
@@ -131,19 +131,19 @@ Top tokenized equities: TSLAX ($58.67M), CRCLX ($45.79M), SPYX ($43.37M), MSTRX 
 
 ## Program activity and chain health
 
-Chain clock drift: **+15.2 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
+Chain clock drift: **+14.7 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| Pump.fun | 57,984 (approx.) | 94.00% | 0.8 s |
-| SPL Token | 44,566 | 32.30% | 1.3 s |
-| Jupiter v6 | 2,149 | 40.80% | 27.7 s |
-| Orca Whirlpools | 1,149 | 69.80% | 52 s |
-| Raydium AMM v4 | 824 | 32.90% | 72.2 s |
+| SPL Token | 31,775 | 26.10% | 1.7 s |
+| Pump.fun | 31,527 | 85.40% | 1.7 s |
+| Jupiter v6 | 1,871 | 38.40% | 31.7 s |
+| Orca Whirlpools | 983 | 72.90% | 60.8 s |
+| Raydium AMM v4 | 754 | 28.80% | 79.4 s |
 
-Median failure rate across the sampled programs: **40.80%** (range 32.30% to 94.00%). This is a consistent trend signal across these five programs, not a chain-wide rate.
+Median failure rate across the sampled programs: **38.40%** (range 26.10% to 85.40%). This is a consistent trend signal across these five programs, not a chain-wide rate.
 
 Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **35.24 SOL**.
 
@@ -153,8 +153,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 321.64K USD | DeFiLlama: 424.81K USD | -27.64% | agree (95% CI 181K to 462K) |
-| SOL price | coingecko: 73.73 USD | Jupiter (on-chain DEX): 73.70 USD | +0.04% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 387.40K USD | DeFiLlama: 424.81K USD | -9.21% | agree (95% CI 212K to 563K) |
+| SOL price | coingecko: 73.73 USD | Jupiter (on-chain DEX): 73.73 USD | 0.00% | agree |
 | Circulating supply | getSupply (RPC): 581.19M SOL | CoinGecko: 581.19M SOL | -0.00% | agree |
 
 ## Protocol development
