@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-03 19:01 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-03 20:41 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -11,31 +11,31 @@
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 3.4K |
+| TPS (total, 10-min median) | 3.5K |
 | TPS (non-vote) | 1.9K |
-| Slot time | 427.1 ms |
+| Slot time | 422.5 ms |
 | Slot | 437M |
 | Block height | 415M |
-| Epoch | 1011 (63.50% complete, ~18.7h remaining) |
+| Epoch | 1011 (66.78% complete, ~16.8h remaining) |
 | Lifetime transactions | 534.8B |
 | Circulating supply | 581.2M SOL |
 | Inflation (annual) | 3.71% |
-| Median transaction fee | 5,564 lamports (about $0.00041) |
-| Transaction fee p90 / p99 | 51,565 / 1,005,000 lamports |
-| Paying base fee only | 20.80% of 5,215 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 56.70% of slots needed a priority fee (max 19.2M µlam/CU) |
+| Median transaction fee | 5,772 lamports (about $0.00043) |
+| Transaction fee p90 / p99 | 21,304 / 823,368 lamports |
+| Paying base fee only | 18.60% of 6,036 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 20.70% of slots needed a priority fee (max 5.5M µlam/CU) |
 | Node version (RPC) | 4.1.0 |
 
 ## Validators & decentralization
 
 | Metric | Value |
 |---|---|
-| Active validators | 690 |
-| Delinquent validators | 13 |
+| Active validators | 691 |
+| Delinquent validators | 12 |
 | Delinquent stake | 0.13% |
 | Total active stake | 432.1M SOL |
 | Nakamoto coefficient | 18 |
-| Top-5 / Top-10 / Top-20 stake share | 15.46% / 24.44% / 35.76% |
+| Top-5 / Top-10 / Top-20 stake share | 15.45% / 24.44% / 35.76% |
 | Commission (stake-weighted, delegatable validators) | 3.81% |
 | Stake on private (100% commission) validators | 24.37% |
 
@@ -58,36 +58,36 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $73.94 (+0.90% 24h) |
-| Market cap | $42.98B (rank #7) |
-| 24h volume | $1.38B |
-| ATH | $293.31 (-74.79% from ATH) |
+| SOL price | $73.92 (+0.60% 24h) |
+| Market cap | $42.96B (rank #7) |
+| 24h volume | $1.43B |
+| ATH | $293.31 (-74.80% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
 
 | Metric | Value |
 |---|---|
-| TVL | $4.76B |
+| TVL | $4.77B |
 | Stablecoin supply | $15.76B |
 | DEX volume (24h) | $1.34B (+3.22% 1d) |
 | App fees (24h, all protocols) | $7.51M |
 | Chain fees (24h) | $422.08K |
-| Jito MEV tips (24h) | $117.48K |
-| **REV - Real Economic Value (24h)** | **$539.56K** (chain fees + MEV tips) |
+| Jito MEV tips (24h) | $122.03K |
+| **REV - Real Economic Value (24h)** | **$544.11K** (chain fees + MEV tips) |
 
 ### Top stablecoins on Solana
 
 | Symbol | $ on Solana | 7d Δ |
 |---|---|---|
-| USDC | $6.98B | -8.26% |
+| USDC | $6.97B | -8.33% |
 | USDT | $3.35B | +0.90% |
 | USDGO | $1.11B | +0.45% |
 | USD1 | $1.02B | +0.03% |
-| PYUSD | $676.44M | -0.81% |
+| PYUSD | $676.36M | -0.81% |
 | BUIDL | $675.15M | +3.26% |
-| USDG | $638.99M | +3.11% |
-| USDe | $539.13M | +0.41% |
+| USDG | $650.28M | +5.00% |
+| USDe | $539.17M | +0.41% |
 
 ### Top DEXs by 24h volume
 
@@ -96,9 +96,9 @@
 | PumpSwap | $620.18M |
 | Orca DEX | $119.43M |
 | BisonFi | $89.33M |
-| Meteora DLMM | $85.76M |
-| Manifest Trade | $74.24M |
-| Raydium AMM | $68.75M |
+| Meteora DLMM | $80.31M |
+| Raydium AMM | $76.82M |
+| Manifest Trade | $75.88M |
 | GoonFi | $68.69M |
 | pump.fun | $55.12M |
 
@@ -111,7 +111,7 @@
 | Collector Crypt | $946.65K |
 | Axiom | $753.44K |
 | Sanctum Validator LSTs | $353.14K |
-| Meteora DLMM | $250.70K |
+| Meteora DLMM | $245.88K |
 | Binance Staked SOL | $221.75K |
 | Jito Liquid Staking | $211.44K |
 
@@ -119,31 +119,31 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 271 |
-| Persistently-active cohort (capture-recapture est.) | 2.8K |
-| Unique payers across sampled blocks | 1.6K (8 blocks over 24h) |
-| xStocks tokenized-equity AUM | $363.36M |
-| xStocks 24h DEX volume | $17.92M |
-| xStocks holders | 246.5K |
+| Activity index: unique fee payers per block (24h sampled avg) | 269 |
+| Persistently-active cohort (capture-recapture est.) | 2.5K |
+| Unique payers across sampled blocks | 1.5K (8 blocks over 24h) |
+| xStocks tokenized-equity AUM | $364.48M |
+| xStocks 24h DEX volume | $18.85M |
+| xStocks holders | 246.6K |
 | Total RWA TVL on Solana | $1.78B |
 
-Top tokenized equities: TSLAX ($60.04M), CRCLX ($45.40M), SPYX ($43.62M), MSTRX ($35.48M), QQQX ($30.19M)
+Top tokenized equities: TSLAX ($60.52M), CRCLX ($45.95M), SPYX ($43.46M), MSTRX ($35.78M), QQQX ($30.29M)
 
 ## Program activity and chain health
 
-Chain clock drift: **+17.3 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
+Chain clock drift: **+16.6 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| SPL Token | 53,173 (approx.) | 44.20% | 0.9 s |
-| Pump.fun | 23,203 | 86.10% | 2.6 s |
-| Jupiter v6 | 5,736 | 60.20% | 10.3 s |
-| Raydium AMM v4 | 3,268 | 11.60% | 17.9 s |
-| Orca Whirlpools | 2,148 | 61.00% | 27.8 s |
+| SPL Token | 43,172 | 48.60% | 1.3 s |
+| Pump.fun | 23,602 | 87.70% | 2.1 s |
+| Raydium AMM v4 | 2,837 | 47.00% | 21.1 s |
+| Jupiter v6 | 1,863 | 43.50% | 32.1 s |
+| Orca Whirlpools | 614 | 60.70% | 97.6 s |
 
-Median failure rate across the sampled programs: **60.20%** (range 11.60% to 86.10%). This is a consistent trend signal across these five programs, not a chain-wide rate.
+Median failure rate across the sampled programs: **48.60%** (range 43.50% to 87.70%). This is a consistent trend signal across these five programs, not a chain-wide rate.
 
 Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **35.24 SOL**.
 
@@ -153,8 +153,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 564.24K USD | DeFiLlama: 422.08K USD | +28.83% | agree (95% CI 266K to 863K) |
-| SOL price | coingecko: 73.94 USD | Jupiter (on-chain DEX): 73.92 USD | +0.03% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 411.56K USD | DeFiLlama: 422.08K USD | -2.52% | agree (95% CI 303K to 520K) |
+| SOL price | coingecko: 73.92 USD | Jupiter (on-chain DEX): 73.92 USD | 0.00% | agree |
 | Circulating supply | getSupply (RPC): 581.19M SOL | CoinGecko: 581.19M SOL | -0.00% | agree |
 
 ## Protocol development
@@ -187,6 +187,7 @@ Quantities that two independent sources can both see, compared against each othe
 
 ## Ecosystem news
 
+- **[BlackRock Launches Tokenized Money Market Funds on Solana, Ethereum](https://decrypt.co/374865/blackrock-tokenized-money-market-funds-solana-ethereum)** - Decrypt, 2026-08-03
 - **[Inside Solana’s Growing Market for Tokenized Cards and Physical Collectibles](https://solana.com/news/tokenized-cards-and-physical-collectibles)** - Solana.com, 2026-07-31
 - **[Overview of Institutional Real World Assets on Solana](https://solana.com/news/overview-of-institutional-real-world-assets-on-solana)** - Solana.com, 2026-07-30
 - **[Solana Changelog: Mainnet raises block limits to 100M CUs](https://solana.com/news/solana-changelog-july-30-2026)** - Solana.com, 2026-07-30
@@ -196,7 +197,6 @@ Quantities that two independent sources can both see, compared against each othe
 - **[Deploying enterprise stablecoin rails on Solana in days with Crossmint](https://solana.com/news/case-study-crossmint)** - Solana.com, 2026-07-23
 - **[Rent Reduction on Solana: A Data-Backed Analysis](https://solana.com/news/rent-reduction-deep-dive)** - Solana.com, 2026-07-20
 - **[Solana Changelog: July 16, 2026](https://solana.com/news/solana-changelog-july-16-2026)** - Solana.com, 2026-07-16
-- **[The Sun Rises in Seoul and Trades on Solana: $SKHY is Now Live](https://solana.com/news/skhy-is-now-live)** - Solana.com, 2026-07-10
 
 ---
 
