@@ -16,7 +16,8 @@ export function Section({
   children: ReactNode
 }) {
   return (
-    <section id={id} className="relative z-10 mt-12 first:mt-0">
+    // scroll-mt keeps the heading clear of the sticky nav when jumped to.
+    <section id={id} className="relative z-10 mt-12 scroll-mt-14 first:mt-0">
       <div className="mb-3 flex items-baseline gap-3 border-border border-b pb-2">
         <h2 className="font-semibold text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
           {title}
@@ -87,13 +88,12 @@ export function Tile({
   return (
     <div
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-lg border border-border bg-card pt-3 transition-colors hover:border-border/80",
-        hasSpark ? "pb-0" : "pb-3",
+        "group relative flex flex-col rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:border-border/80",
         wide && "col-span-full"
       )}
     >
-      <div className="px-4 text-[11px] text-muted-foreground">{label}</div>
-      <div className="mt-1 flex items-baseline gap-2 px-4">
+      <div className="text-[11px] text-muted-foreground">{label}</div>
+      <div className="mt-1 flex items-baseline gap-2">
         <AnimatedValue
           value={value}
           className="font-semibold text-[22px] text-foreground tracking-tight"
@@ -110,15 +110,26 @@ export function Tile({
         )}
       </div>
       {sub && (
-        <div className="mt-0.5 px-4 text-[11px] text-muted-foreground/85 leading-snug">
+        <div className="mt-0.5 text-[11px] text-muted-foreground/85 leading-snug">
           {sub}
         </div>
       )}
-      {/* Full-bleed strip rather than a floating corner spark: at tile width
-          a corner overlay lands on top of the sub text at some breakpoints. */}
+      {/* Inset, not full-bleed. Running the spark to the card edge made it
+          read as a progress bar, and the corner radius clipped it so it
+          looked like a rendering fault. mt-auto pins it to the bottom so
+          sparked and unsparked tiles in the same row still line up. */}
       {hasSpark && (
-        <div className="pointer-events-none mt-auto h-9 w-full pt-2 opacity-65 transition-opacity group-hover:opacity-100">
-          <Sparkline data={spark!} color={sparkColor} bloomOnHover bloom="low" />
+        <div className="pointer-events-none mt-auto w-full pt-3">
+          {/* Needs real height to read as a trend rather than a coloured bar:
+              at ~16px the dither fill is thicker than the shape it encodes. */}
+          <div className="h-10 w-full overflow-hidden rounded-[3px] opacity-70 transition-opacity group-hover:opacity-100">
+            <Sparkline
+              data={spark!}
+              color={sparkColor}
+              bloomOnHover
+              bloom="low"
+            />
+          </div>
         </div>
       )}
     </div>
@@ -194,6 +205,98 @@ export function Table({
         </tbody>
       </table>
     </div>
+  )
+}
+
+/**
+ * The band above the fold. A reader should be able to answer "is Solana
+ * healthy right now, and what is it doing" without scrolling, which the
+ * previous layout could not do: the verdict was one thin strip under its own
+ * section header, and every metric below it was rendered at the same weight,
+ * so nothing indicated what to look at first.
+ */
+export function Hero({
+  verdict,
+  detail,
+  severity,
+  stats,
+}: {
+  verdict: string
+  detail: string
+  severity: "ok" | "warning" | "critical"
+  stats: { label: string; value: string; sub?: string; tone?: "up" | "down" }[]
+}) {
+  const accent = {
+    ok: "text-emerald-400 border-l-emerald-400",
+    warning: "text-amber-400 border-l-amber-400",
+    critical: "text-rose-400 border-l-rose-400",
+  }[severity]
+
+  return (
+    <section className="relative z-10">
+      <div
+        className={cn(
+          "rounded-lg border border-border border-l-2 bg-card px-5 py-4",
+          accent
+        )}
+      >
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2 className={cn("font-semibold text-[15px]", accent)}>{verdict}</h2>
+          <p className="text-[12.5px] text-muted-foreground">{detail}</p>
+        </div>
+
+        <div className="mt-4 grid gap-x-6 gap-y-4 border-border/70 border-t pt-4 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label}>
+              <div className="text-[10.5px] text-muted-foreground uppercase tracking-[0.12em]">
+                {s.label}
+              </div>
+              <div className="mt-1 flex items-baseline gap-2">
+                <AnimatedValue
+                  value={s.value}
+                  className="font-semibold text-[26px] text-foreground tracking-tight"
+                />
+                {s.sub && (
+                  <span
+                    className={cn(
+                      "text-[12px]",
+                      s.tone === "up"
+                        ? "text-emerald-400"
+                        : s.tone === "down"
+                          ? "text-rose-400"
+                          : "text-muted-foreground"
+                    )}
+                  >
+                    {s.sub}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/** Jump links for a page that is otherwise several screens of uniform cards. */
+export function SectionNav({
+  items,
+}: {
+  items: { id: string; label: string }[]
+}) {
+  return (
+    <nav className="scrollbar-none sticky top-0 z-20 -mx-4 mb-2 flex gap-1 overflow-x-auto border-border/60 border-b bg-background/85 px-4 py-2 backdrop-blur">
+      {items.map((it) => (
+        <a
+          key={it.id}
+          href={`#${it.id}`}
+          className="whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          {it.label}
+        </a>
+      ))}
+    </nav>
   )
 }
 

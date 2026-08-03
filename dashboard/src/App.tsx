@@ -14,7 +14,17 @@ import {
   YAxis,
 } from "@/components/dither-kit"
 import { LoadingSkeleton } from "@/components/motion"
-import { Card, Grid, LinkList, Pill, Section, Table, Tile } from "@/components/shell"
+import {
+  Card,
+  Grid,
+  Hero,
+  LinkList,
+  Pill,
+  Section,
+  SectionNav,
+  Table,
+  Tile,
+} from "@/components/shell"
 import { day, int, num, pct, shortKey, thin, usd } from "@/format"
 import type { HistoryRow, Report } from "@/types"
 
@@ -190,16 +200,71 @@ export default function App() {
           </div>
         </header>
 
-        <Section title="Alerts">
-          {anomalies.length === 0 ? (
-            <div className="flex items-start gap-3 rounded-lg border border-border border-l-2 border-l-emerald-400 bg-card px-4 py-3">
-              <Pill tone="ok">OK</Pill>
-              <p className="text-[13px] text-muted-foreground">
-                <span className="text-foreground">All clear.</span> Every watched
-                metric is inside its 7-day baseline and health thresholds.
-              </p>
-            </div>
-          ) : (
+        <Hero
+          severity={
+            anomalies.some((x) => x.severity === "critical")
+              ? "critical"
+              : anomalies.length
+                ? "warning"
+                : "ok"
+          }
+          verdict={
+            anomalies.length === 0
+              ? "All systems normal"
+              : `${anomalies.length} ${anomalies.length === 1 ? "alert" : "alerts"}`
+          }
+          detail={
+            anomalies.length === 0
+              ? "Every watched metric is inside its 7-day baseline and health thresholds."
+              : "Details below. Each finding clears both a statistical and a minimum-size bar."
+          }
+          stats={[
+            {
+              label: "Transactions/sec",
+              value: num(n.tps),
+              sub: `${num(n.true_tps)} non-vote`,
+            },
+            {
+              label: "SOL price",
+              value: usd(m.price_usd),
+              sub:
+                m.change_24h_pct != null
+                  ? `${pct(m.change_24h_pct, true)} 24h`
+                  : undefined,
+              tone: priceUp ? "up" : "down",
+            },
+            { label: "Total value locked", value: usd(d.tvl_usd) },
+            {
+              label: "Tx failure rate",
+              value:
+                oc?.median_program_failure_rate_pct != null
+                  ? pct(oc.median_program_failure_rate_pct)
+                  : "-",
+              // Solana's failure rate is high by design, dominated by
+              // arbitrage bots firing speculative transactions, so it is not
+              // coloured as an alarm. The subtitle says what it is measured
+              // across rather than leaving a scary number unexplained.
+              sub: "median, 5 programs",
+            },
+          ]}
+        />
+
+        <SectionNav
+          items={[
+            { id: "network", label: "Network" },
+            { id: "validators", label: "Validators" },
+            { id: "market", label: "Market" },
+            { id: "defi", label: "DeFi" },
+            { id: "activity", label: "Activity" },
+            { id: "programs", label: "Programs" },
+            { id: "validation", label: "Validation" },
+            { id: "dev", label: "Development" },
+            { id: "news", label: "News" },
+          ]}
+        />
+
+        {anomalies.length > 0 && (
+          <Section title="Alerts">
             <div className="flex flex-col gap-2">
               {anomalies.map((x) => (
                 <div
@@ -219,10 +284,14 @@ export default function App() {
                 </div>
               ))}
             </div>
-          )}
-        </Section>
+          </Section>
+        )}
 
-        <Section title="Network performance" note="direct from JSON-RPC">
+        <Section
+          id="network"
+          title="Network performance"
+          note="direct from JSON-RPC"
+        >
           <Grid>
             <Tile
               label="Transactions per second"
@@ -350,7 +419,7 @@ export default function App() {
           </div>
         </Section>
 
-        <Section title="Validators & decentralization">
+        <Section id="validators" title="Validators & decentralization">
           <Grid>
             <Tile
               label="Active validators"
@@ -448,7 +517,7 @@ export default function App() {
           </Card>
         </Section>
 
-        <Section title="Market">
+        <Section id="market" title="Market">
           <Grid>
             <Tile
               label="SOL price"
@@ -482,7 +551,13 @@ export default function App() {
             />
           </Grid>
           <Card title="SOL price" note="7 days" className="mt-2.5">
-            <div className="h-[230px]">
+            {/* Area rather than line, and a sparser fill than the default
+                gradient. dither-kit's y-scale is always zero-based
+                (buildYScale clamps the floor to 0), so a line for a ~$74
+                price hugs the top of an empty plot. The area at least uses
+                the space; "dotted" keeps the shape while cutting the ink of
+                a solid slab. */}
+            <div className="h-[210px]">
               <AreaChart
                 data={priceRows}
                 config={{
@@ -497,14 +572,14 @@ export default function App() {
                   maxTicks={7}
                 />
                 <YAxis tickFormatter={(x) => usd(x, 0)} />
-                <Area dataKey="price" variant="gradient" />
+                <Area dataKey="price" variant="dotted" />
                 <Tooltip labelKey="t" valueFormatter={(x) => usd(x)} />
               </AreaChart>
             </div>
           </Card>
         </Section>
 
-        <Section title="DeFi & economics">
+        <Section id="defi" title="DeFi & economics">
           <Grid>
             <Tile
               label="Total value locked"
@@ -560,7 +635,7 @@ export default function App() {
                     maxTicks={5}
                   />
                   <YAxis tickFormatter={(x) => usd(x, 1)} />
-                  <Area dataKey="tvl" variant="gradient" />
+                  <Area dataKey="tvl" variant="dotted" />
                   <Tooltip labelKey="t" valueFormatter={(x) => usd(x)} />
                 </AreaChart>
               </div>
@@ -644,6 +719,7 @@ export default function App() {
         </Section>
 
         <Section
+          id="activity"
           title="Activity & tokenized assets"
           note="activity measured on-chain by Sentinel"
         >
@@ -698,7 +774,7 @@ export default function App() {
                     maxTicks={5}
                   />
                   <YAxis tickFormatter={(x) => usd(x, 0)} />
-                  <Area dataKey="aum" variant="gradient" />
+                  <Area dataKey="aum" variant="dotted" />
                   <Tooltip labelKey="t" valueFormatter={(x) => usd(x)} />
                 </AreaChart>
               </div>
@@ -723,6 +799,7 @@ export default function App() {
 
         {oc && (oc.programs?.length || oc.drift_secs != null) && (
           <Section
+            id="programs"
             title="Program activity & chain health"
             note="measured directly on-chain"
           >
@@ -796,6 +873,7 @@ export default function App() {
 
         {report.crosscheck && report.crosscheck.checks.length > 0 && (
           <Section
+            id="validation"
             title="Cross-source validation"
             note={`${report.crosscheck.agree} of ${report.crosscheck.total} independent sources agree`}
           >
@@ -838,7 +916,7 @@ export default function App() {
           </Section>
         )}
 
-        <Section title="Protocol development">
+        <Section id="dev" title="Protocol development">
           <div className="grid gap-2.5 lg:grid-cols-2">
             <Card title="Upgrade watchlist" note="consensus, fees, Alpenglow">
               <LinkList
@@ -896,7 +974,7 @@ export default function App() {
           </div>
         </Section>
 
-        <Section title="Ecosystem news">
+        <Section id="news" title="Ecosystem news">
           <Card>
             <LinkList
               items={news.items.map((it) => ({
