@@ -449,10 +449,26 @@ class TestCrossCheck(unittest.TestCase):
 
     def test_diverges_when_the_two_are_orders_apart(self):
         res = crosscheck.crosscheck(
-            self.snapshot(defi={"chain_fees_24h_usd": 10_000_000}))
+            self.snapshot(defi={"chain_fees_24h_usd": 100_000_000}))
         fees = next(c for c in res["checks"] if c["check"] == "chain_fees")
         self.assertFalse(fees["agrees"])
+
+    def test_the_fee_check_never_raises_an_alert(self):
+        # Its own sampling noise spans ~3.5x run to run, so alerting from it
+        # would fire regularly and mean nothing.
+        res = crosscheck.crosscheck(
+            self.snapshot(defi={"chain_fees_24h_usd": 100_000_000}))
+        fees = next(c for c in res["checks"] if c["check"] == "chain_fees")
+        self.assertFalse(fees["agrees"])
+        self.assertFalse(fees["alerting"])
+        self.assertEqual(res["divergences"], [])
+        self.assertEqual(crosscheck.divergence_findings(res), [])
+
+    def test_precise_checks_still_raise(self):
+        res = crosscheck.crosscheck(
+            self.snapshot(market={"circulating_supply": 700_000_000}))
         self.assertEqual(len(res["divergences"]), 1)
+        self.assertEqual(res["divergences"][0]["check"], "circulating_supply")
 
     def test_skipped_when_the_block_rate_is_not_known_yet(self):
         # On a first-ever run there is no history to measure the rate from,
@@ -463,12 +479,13 @@ class TestCrossCheck(unittest.TestCase):
         self.assertFalse(any(c["check"] == "chain_fees" for c in res["checks"]))
 
     def test_a_divergence_becomes_a_finding(self):
+        # Uses supply, not fees: only checks precise enough to act on alert.
         res = crosscheck.crosscheck(
-            self.snapshot(defi={"chain_fees_24h_usd": 10_000_000}))
+            self.snapshot(market={"circulating_supply": 700_000_000}))
         findings = crosscheck.divergence_findings(res)
         self.assertEqual(len(findings), 1)
         self.assertEqual(findings[0]["severity"], "warning")
-        self.assertIn("x band", findings[0]["detail"])
+        self.assertIn("tolerance", findings[0]["detail"])
         # Must match the anomaly finding shape so both render identically.
         for key in ("metric", "label", "severity", "kind", "detail"):
             self.assertIn(key, findings[0])

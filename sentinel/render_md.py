@@ -244,16 +244,19 @@ def render(s: dict) -> str:
         add("")
         add(f"Quantities that two independent sources can both see, compared "
             f"against each other. {cc.get('agree', 0)} of {cc.get('total', 0)} "
-            f"agree this run.")
+            f"agree this run. Rows marked *indicative* are reported for "
+            f"corroboration but never raise an alert, because their own "
+            f"measurement noise is wider than any threshold worth acting on.")
         add("")
         add("| Quantity | Source A | Source B | Gap | Verdict |")
         add("|---|---|---|---|---|")
         for c in cc["checks"]:
             unit = f" {c['unit']}" if c.get("unit") else ""
             verdict = "agree" if c["agrees"] else "**diverge**"
-            if c.get("a_interval_95"):
-                lo, hi = c["a_interval_95"]
-                verdict += f" (95% CI {fmt.num(lo, 0)} to {fmt.num(hi, 0)})"
+            if c.get("ratio"):
+                verdict += f" ({c['ratio']:.2f}x)"
+            if not c.get("alerting", True):
+                verdict += ", *indicative*"
             add(f"| {c['label']} | {c['a_source']}: {fmt.num(c['a_value'], 2)}{unit} "
                 f"| {c['b_source']}: {fmt.num(c['b_value'], 2)}{unit} "
                 f"| {fmt.pct(c.get('gap_pct'), signed=True)} | {verdict} |")

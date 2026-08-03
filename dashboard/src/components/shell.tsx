@@ -300,6 +300,40 @@ export function SectionNav({
   )
 }
 
+/**
+ * A share rendered as a number with a proportional bar behind it.
+ *
+ * A column of twelve near-identical percentages is read digit by digit; the
+ * bar makes the ranking and the size of the gaps legible at a glance without
+ * removing the exact figure.
+ */
+export function ShareBar({
+  value,
+  max,
+  label,
+}: {
+  value: number
+  max: number
+  label: string
+}) {
+  const width = max > 0 ? Math.max(2, (value / max) * 100) : 0
+  return (
+    <div className="flex items-center justify-end gap-2">
+      <div
+        className="h-1.5 w-16 shrink-0 overflow-hidden rounded-full bg-muted"
+        role="img"
+        aria-label={`${label} of total stake`}
+      >
+        <div
+          className="h-full rounded-full bg-sky-500/70 transition-[width] duration-500"
+          style={{ width: `${width}%` }}
+        />
+      </div>
+      <span className="tabular-nums">{label}</span>
+    </div>
+  )
+}
+
 export function Pill({
   children,
   tone = "muted",

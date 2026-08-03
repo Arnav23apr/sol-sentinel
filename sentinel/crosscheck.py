@@ -29,12 +29,19 @@ from .net import FetchError, fetch_json
 
 WSOL_MINT = "So11111111111111111111111111111111111111112"
 
-# Fee sampling reads 8 blocks out of ~205,000 in a day, so it can corroborate
-# the magnitude of an independently reported total but not pin its value. Two
-# measurements of a bursty, heavy-tailed quantity landing within 2x of each
-# other is real corroboration; beyond that, one of them is measuring something
-# else.
-FEE_RATIO_BAND = 2.0
+# Fee sampling reads 8 blocks out of ~205,000 in a day. Successive runs have
+# put our estimate at 0.63x, 0.73x, 0.90x and 2.19x of the same DeFiLlama
+# figure: a 3.5x spread from sampling noise alone, on a quantity that is both
+# heavy-tailed within a block and bursty across the day.
+#
+# The estimator's own noise is therefore larger than any threshold worth
+# alerting on, so this check does not raise findings. Alerting from it would
+# reproduce exactly the failure the anomaly engine was fixed for: warnings
+# that are arithmetically correct, fire regularly, and mean nothing, which
+# spends the reader's attention on noise. It is reported as corroborating
+# context, with a wide band that only catches a genuine order-of-magnitude
+# disagreement.
+FEE_RATIO_BAND = 4.0
 PRICE_TOLERANCE_PCT = 2.0
 SUPPLY_TOLERANCE_PCT = 2.0
 
@@ -113,7 +120,9 @@ def crosscheck(snapshot: dict) -> dict:
         ratio = ours / theirs if theirs else None
         check["ratio"] = round(ratio, 2) if ratio else None
         check["agrees"] = bool(ratio and 1 / FEE_RATIO_BAND <= ratio <= FEE_RATIO_BAND)
-        check["basis"] = f"within {FEE_RATIO_BAND:g}x (8-block sample)"
+        check["basis"] = f"same order of magnitude (within {FEE_RATIO_BAND:g}x)"
+        # Reported, never alerted on: see FEE_RATIO_BAND.
+        check["alerting"] = False
         checks.append(check)
 
     # 2. SOL price: centralised aggregate vs on-chain DEX quote.
@@ -140,11 +149,15 @@ def crosscheck(snapshot: dict) -> dict:
             SUPPLY_TOLERANCE_PCT, "SOL"))
 
     checks = [c for c in checks if c]
+    for c in checks:
+        c.setdefault("alerting", True)
     return {
         "checks": checks,
         "agree": sum(1 for c in checks if c["agrees"]),
         "total": len(checks),
-        "divergences": [c for c in checks if not c["agrees"]],
+        # Only checks precise enough to act on can raise a finding.
+        "divergences": [c for c in checks
+                        if not c["agrees"] and c.get("alerting", True)],
     }
 
 

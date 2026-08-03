@@ -178,6 +178,9 @@ export type CrossCheck = {
   ratio?: number | null
   blocks_per_day?: number
   basis?: string
+  /** False when the check is reported for corroboration but is too noisy to
+   * raise an alert from. */
+  alerting?: boolean
 }
 
 export type Tokenized = {

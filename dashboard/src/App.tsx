@@ -21,6 +21,7 @@ import {
   LinkList,
   Pill,
   Section,
+  ShareBar,
   SectionNav,
   Table,
   Tile,
@@ -157,6 +158,13 @@ export default function App() {
   const ep = n.epoch
   const anomalies = report.anomalies ?? []
   const priceUp = (m.change_24h_pct ?? 0) >= 0
+  // Bars are scaled to the largest validator rather than to 100%, since the
+  // top holder sits near 4% and scaling to 100 would render every bar as an
+  // indistinguishable sliver.
+  const topValidatorShare = Math.max(
+    ...v.top_validators.map((x) => x.share_pct),
+    0.01
+  )
 
   return (
     <div className="relative min-h-full">
@@ -327,12 +335,16 @@ export default function App() {
                 sub={`of 150 slots needed a priority fee · max ${num(
                   n.max_prioritization_fee
                 )} µlam/CU`}
-              />
+                spark={sparkOf(history, "prio_congestion_pct")}
+              sparkColor="orange"
+            />
             )}
             <Tile
               label="Circulating supply"
               value={`${num(n.supply.circulating_sol)} SOL`}
               sub={`inflation ${pct(n.inflation_total_pct)}/yr`}
+              spark={sparkOf(history, "circulating_sol")}
+              sparkColor="blue"
             />
             {a.median_tx_fee_lamports != null && (
               <Tile
@@ -445,16 +457,22 @@ export default function App() {
               label="Total active stake"
               value={`${num(v.total_active_stake_sol)} SOL`}
               sub={`stake-weighted commission ${pct(v.avg_commission)}`}
+              spark={sparkOf(history, "staked_sol")}
+              sparkColor="green"
             />
             <Tile
               label="Top-5 stake share"
               value={pct(v.top5_stake_pct)}
               sub={`top-20: ${pct(v.top20_stake_pct)}`}
+              spark={sparkOf(history, "top5_stake_pct")}
+              sparkColor="purple"
             />
             <Tile
               label="Private validator stake"
               value={pct(v.private_stake_pct)}
               sub="on 100%-commission (self-stake) validators"
+              spark={sparkOf(history, "private_stake_pct")}
+              sparkColor="orange"
             />
           </Grid>
 
@@ -510,7 +528,11 @@ export default function App() {
                 <span className="text-muted-foreground">{i + 1}</span>,
                 <code className="text-[12px]">{shortKey(x.vote)}</code>,
                 num(x.stake_sol),
-                pct(x.share_pct),
+                <ShareBar
+                  value={x.share_pct}
+                  max={topValidatorShare}
+                  label={pct(x.share_pct)}
+                />,
                 `${x.commission ?? "-"}%`,
               ])}
             />
@@ -537,8 +559,12 @@ export default function App() {
                 m.market_cap_estimated ? " (est.)" : ""
               }`}
               sub={m.market_cap_rank ? `rank #${m.market_cap_rank}` : undefined}
+              spark={sparkOf(history, "market_cap")}
+              sparkColor="blue"
             />
-            <Tile label="24h volume" value={usd(m.volume_24h_usd)} />
+            <Tile label="24h volume" value={usd(m.volume_24h_usd)}   spark={sparkOf(history, "volume_24h")}
+              sparkColor="orange"
+            />
             <Tile
               label="From ATH"
               value={pct(m.ath_change_pct, true)}
@@ -617,6 +643,8 @@ export default function App() {
               label="App fees 24h"
               value={usd(d.app_fees_24h_usd)}
               sub="every protocol on Solana"
+              spark={sparkOf(history, "app_fees_24h")}
+              sparkColor="purple"
             />
           </Grid>
 
@@ -741,21 +769,29 @@ export default function App() {
                     : "-"
               }
               sub="capture-recapture estimate"
+              spark={sparkOf(history, "active_cohort")}
+              sparkColor="pink"
             />
             <Tile
               label="xStocks AUM"
               value={usd(tk.xstocks_aum_usd)}
               sub="tokenized equities on Solana"
+              spark={sparkOf(history, "xstocks_aum")}
+              sparkColor="pink"
             />
             <Tile
               label="xStocks 24h volume"
               value={usd(tk.xstocks_volume_24h_usd)}
               sub={`${num(tk.xstocks_holders)} holders`}
+              spark={sparkOf(history, "xstocks_volume")}
+              sparkColor="orange"
             />
             <Tile
               label="RWA TVL"
               value={usd(tk.rwa_tvl_usd)}
               sub="all real-world-asset protocols"
+              spark={sparkOf(history, "rwa_tvl")}
+              sparkColor="blue"
             />
           </Grid>
 
@@ -833,7 +869,9 @@ export default function App() {
                   label="Unwithdrawn rewards"
                   value={`${num(oc.unwithdrawn_sol_top8, 2)} SOL`}
                   sub="inflation rewards sitting in the top 8 vote accounts"
-                />
+                  spark={sparkOf(history, "unwithdrawn_sol")}
+              sparkColor="green"
+            />
               )}
             </Grid>
             {oc.programs && oc.programs.length > 0 && (
@@ -902,14 +940,17 @@ export default function App() {
                     {c.b_source}: {reading(c.b_value)}
                   </span>,
                   pct(c.gap_pct, true),
-                  c.agrees ? (
-                    <span className="text-emerald-400">
-                      agree
-                      {c.ratio ? ` (${c.ratio.toFixed(2)}x)` : ""}
-                    </span>
-                  ) : (
-                    <span className="text-amber-400">diverge</span>
-                  ),
+                  <span
+                    className={
+                      c.agrees ? "text-emerald-400" : "text-amber-400"
+                    }
+                  >
+                    {c.agrees ? "agree" : "diverge"}
+                    {c.ratio ? ` (${c.ratio.toFixed(2)}x)` : ""}
+                    {c.alerting === false && (
+                      <span className="text-muted-foreground"> · indicative</span>
+                    )}
+                  </span>,
                 ])}
               />
             </Card>
