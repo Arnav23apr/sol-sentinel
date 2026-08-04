@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { type ReactNode, useState } from "react"
 import { Sparkline } from "@/components/dither-kit"
 import type { DitherColor } from "@/components/dither-kit"
 import { AnimatedValue } from "@/components/motion"
@@ -71,6 +71,7 @@ export function Tile({
   spark,
   sparkColor = "blue",
   wide,
+  onOpen,
 }: {
   label: string
   value: string
@@ -80,6 +81,8 @@ export function Tile({
   spark?: number[]
   sparkColor?: DitherColor
   wide?: boolean
+  /** Present when this metric has a recorded history worth opening. */
+  onOpen?: () => void
 }) {
   // Below ~6 points a sparkline is a flat smear that implies "no movement"
   // rather than "not enough history yet", so hide it until the run history
@@ -89,8 +92,20 @@ export function Tile({
     <div
       className={cn(
         "group relative flex flex-col rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:border-border/80",
-        wide && "col-span-full"
+        wide && "col-span-full",
+        onOpen &&
+          "cursor-pointer hover:border-sky-500/50 focus-visible:outline-2 focus-visible:outline-sky-500"
       )}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (onOpen && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault()
+          onOpen()
+        }
+      }}
+      tabIndex={onOpen ? 0 : undefined}
+      role={onOpen ? "button" : undefined}
+      aria-label={onOpen ? `${label}: open full history` : undefined}
     >
       <div className="text-[11px] text-muted-foreground">{label}</div>
       <div className="mt-1 flex items-baseline gap-2">
@@ -155,39 +170,110 @@ export function Grid({
   )
 }
 
+/**
+ * A table whose columns can be sorted by clicking their header.
+ *
+ * `sortKeys` supplies the value to sort each row by, parallel to `rows`, so
+ * sorting works on the underlying number rather than on rendered text (which
+ * would order "$1.2B" before "$900M"). Columns with a null key stay inert.
+ */
 export function Table({
   head,
   rows,
   align = "",
+  sortKeys,
+  initialSort,
 }: {
   head: string[]
   rows: ReactNode[][]
   /** One char per column: "r" right-aligns (numbers), anything else left. */
   align?: string
+  sortKeys?: (string | number | null)[][]
+  initialSort?: { col: number; dir: "asc" | "desc" }
 }) {
+  const [sort, setSort] = useState(initialSort ?? null)
+
+  const sortableCols = new Set<number>()
+  if (sortKeys?.length) {
+    for (let c = 0; c < head.length; c++) {
+      if (sortKeys.some((k) => k[c] != null)) sortableCols.add(c)
+    }
+  }
+
+  const order = rows.map((_, i) => i)
+  if (sort && sortKeys?.length) {
+    order.sort((a, b) => {
+      const av = sortKeys[a]?.[sort.col]
+      const bv = sortKeys[b]?.[sort.col]
+      if (av == null && bv == null) return 0
+      if (av == null) return 1 // missing values sink, either direction
+      if (bv == null) return -1
+      const cmp =
+        typeof av === "number" && typeof bv === "number"
+          ? av - bv
+          : String(av).localeCompare(String(bv))
+      return sort.dir === "asc" ? cmp : -cmp
+    })
+  }
+
+  const toggle = (c: number) => {
+    if (!sortableCols.has(c)) return
+    setSort((prev) =>
+      prev?.col === c
+        ? { col: c, dir: prev.dir === "asc" ? "desc" : "asc" }
+        : // Numbers are almost always most interesting largest-first.
+          { col: c, dir: align[c] === "r" ? "desc" : "asc" }
+    )
+  }
+
   return (
     <div className="-mx-1 overflow-x-auto px-1">
       <table className="w-full border-collapse text-[12.5px]">
         <thead>
           <tr>
-            {head.map((h, i) => (
-              <th
-                key={h}
-                className={cn(
-                  "border-border border-b pb-1.5 font-normal text-[10.5px] text-muted-foreground uppercase tracking-wider",
-                  align[i] === "r" ? "text-right" : "text-left"
-                )}
-              >
-                {h}
-              </th>
-            ))}
+            {head.map((h, i) => {
+              const on = sortableCols.has(i)
+              const active = sort?.col === i
+              return (
+                <th
+                  key={h}
+                  aria-sort={
+                    active
+                      ? sort.dir === "asc"
+                        ? "ascending"
+                        : "descending"
+                      : undefined
+                  }
+                  className={cn(
+                    "border-border border-b pb-1.5 font-normal text-[10.5px] uppercase tracking-wider transition-colors",
+                    align[i] === "r" ? "text-right" : "text-left",
+                    on && "cursor-pointer select-none hover:text-foreground",
+                    active ? "text-foreground" : "text-muted-foreground"
+                  )}
+                  onClick={() => toggle(i)}
+                  onKeyDown={(e) => {
+                    if (on && (e.key === "Enter" || e.key === " ")) {
+                      e.preventDefault()
+                      toggle(i)
+                    }
+                  }}
+                  tabIndex={on ? 0 : undefined}
+                >
+                  {h}
+                  {on && (
+                    <span className="ml-1 text-[9px] opacity-70">
+                      {active ? (sort.dir === "asc" ? "▲" : "▼") : "↕"}
+                    </span>
+                  )}
+                </th>
+              )
+            })}
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, r) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: rows are positional
-            <tr key={r} className="group/row">
-              {row.map((cell, c) => (
+          {order.map((ri) => (
+            <tr key={ri} className="group/row">
+              {rows[ri].map((cell, c) => (
                 <td
                   // biome-ignore lint/suspicious/noArrayIndexKey: columns are positional
                   key={c}
@@ -276,6 +362,74 @@ export function Hero({
         </div>
       </div>
     </section>
+  )
+}
+
+export type RangeKey = "24h" | "7d" | "30d" | "all"
+
+export const RANGE_SECONDS: Record<RangeKey, number | null> = {
+  "24h": 86_400,
+  "7d": 7 * 86_400,
+  "30d": 30 * 86_400,
+  all: null,
+}
+
+/**
+ * Time-range control. Sits in one row above the content it scopes and applies
+ * to every time series on the page at once, so the numbers always agree with
+ * each other. Presets rather than a calendar: nobody wants to pick dates to
+ * ask "what happened today".
+ */
+export function Controls({
+  range,
+  onRange,
+  onRefresh,
+  refreshing,
+  updated,
+}: {
+  range: RangeKey
+  onRange: (r: RangeKey) => void
+  onRefresh: () => void
+  refreshing: boolean
+  updated: string
+}) {
+  const ranges: RangeKey[] = ["24h", "7d", "30d", "all"]
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+      <div
+        className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5"
+        role="group"
+        aria-label="Time range"
+      >
+        {ranges.map((r) => (
+          <button
+            key={r}
+            type="button"
+            aria-pressed={range === r}
+            onClick={() => onRange(r)}
+            className={cn(
+              "cursor-pointer rounded px-2.5 py-1 text-[11px] transition-colors",
+              range === r
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {r}
+          </button>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={onRefresh}
+        disabled={refreshing}
+        className="cursor-pointer rounded-md border border-border bg-card px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+      >
+        {refreshing ? "refreshing…" : "refresh"}
+      </button>
+
+      <span className="text-[11px] text-muted-foreground">{updated}</span>
+    </div>
   )
 }
 

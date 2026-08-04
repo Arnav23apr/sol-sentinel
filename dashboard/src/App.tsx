@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Area,
   AreaChart,
@@ -13,11 +13,15 @@ import {
   XAxis,
   YAxis,
 } from "@/components/dither-kit"
+import { MetricDialog } from "@/components/metric-dialog"
 import { LoadingSkeleton } from "@/components/motion"
 import {
   Card,
+  Controls,
   Grid,
   Hero,
+  RANGE_SECONDS,
+  type RangeKey,
   LinkList,
   Pill,
   Section,
@@ -30,6 +34,17 @@ import { day, int, num, pct, shortKey, thin, usd } from "@/format"
 import type { HistoryRow, Report } from "@/types"
 
 const REPO = "https://github.com/Arnav23apr/sol-sentinel"
+
+/** "updated 3 min ago" reads faster than a timestamp for a page that is
+ * constantly refetching. */
+function relativeTime(ms: number): string {
+  const secs = Math.max(0, Math.round((Date.now() - ms) / 1000))
+  if (secs < 60) return "updated just now"
+  const mins = Math.round(secs / 60)
+  if (mins < 60) return `updated ${mins} min ago`
+  const hrs = Math.round(mins / 60)
+  return `updated ${hrs} h ago`
+}
 
 /** Pull one metric out of the rolling history as a plain number[] for a
  * sparkline, newest last. */
@@ -56,6 +71,10 @@ export default function App() {
   const [report, setReport] = useState<Report | null>(null)
   const [history, setHistory] = useState<HistoryRow[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [range, setRange] = useState<RangeKey>("all")
+  const [openMetric, setOpenMetric] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [loadedAt, setLoadedAt] = useState<number>(() => Date.now())
   const [theme, setTheme] = useState<"dark" | "light">(
     () => (localStorage.getItem("sentinel-theme") as "dark" | "light") ?? "dark"
   )
@@ -65,33 +84,61 @@ export default function App() {
     localStorage.setItem("sentinel-theme", theme)
   }, [theme])
 
-  useEffect(() => {
-    let cancelled = false
-    const load = async () => {
-      try {
-        const [r, h] = await Promise.all([
-          fetch(`./report.json?t=${Date.now()}`).then((x) => x.json()),
-          fetch(`./history.json?t=${Date.now()}`)
-            .then((x) => x.json())
-            .catch(() => []),
-        ])
-        if (!cancelled) {
-          setReport(r)
-          setHistory(Array.isArray(h) ? h : [])
-        }
-      } catch (e) {
-        if (!cancelled) setError(String(e))
-      }
+  // Memoised so the polling effect and the refresh button share one loader
+  // and cannot drift apart.
+  const load = useCallback(async () => {
+    setRefreshing(true)
+    try {
+      const [r, h] = await Promise.all([
+        fetch(`./report.json?t=${Date.now()}`).then((x) => x.json()),
+        fetch(`./history.json?t=${Date.now()}`)
+          .then((x) => x.json())
+          .catch(() => []),
+      ])
+      setReport(r)
+      setHistory(Array.isArray(h) ? h : [])
+      setLoadedAt(Date.now())
+      setError(null)
+    } catch (e) {
+      setError(String(e))
+    } finally {
+      setRefreshing(false)
     }
+  }, [])
+
+  useEffect(() => {
     load()
     // The collector republishes every 30 minutes; poll so a tab left open
     // picks up the new snapshot without a manual reload.
     const timer = setInterval(load, 5 * 60 * 1000)
-    return () => {
-      cancelled = true
-      clearInterval(timer)
-    }
+    return () => clearInterval(timer)
+  }, [load])
+
+  // Re-render once a minute so the "updated N min ago" label stays truthful
+  // without refetching anything.
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setTick((x) => x + 1), 60_000)
+    return () => clearInterval(t)
   }, [])
+
+  // One range control scopes every time series on the page, so the charts
+  // and the sparklines always describe the same window.
+  const cutoff = useMemo(() => {
+    const secs = RANGE_SECONDS[range]
+    return secs == null ? 0 : Date.now() / 1000 - secs
+  }, [range])
+
+  const scopedHistory = useMemo(
+    () => history.filter((r) => (r.ts ?? 0) >= cutoff),
+    [history, cutoff]
+  )
+
+  const inRange = useCallback(
+    (pairs: [number, number][] | undefined) =>
+      (pairs ?? []).filter(([t]) => t >= cutoff),
+    [cutoff]
+  )
 
   const perfRows = useMemo(() => {
     const samples = [...(report?.network.perf_samples ?? [])].reverse()
@@ -121,18 +168,24 @@ export default function App() {
   )
 
   const priceRows = useMemo(
-    () => toRows(report?.market.price_history_7d, "price"),
-    [report]
+    () => toRows(inRange(report?.market.price_history_7d), "price"),
+    [report, inRange]
   )
-  const tvlRows = useMemo(() => toRows(report?.defi.tvl_history, "tvl"), [report])
+  const tvlRows = useMemo(
+    () => toRows(inRange(report?.defi.tvl_history), "tvl"),
+    [report, inRange]
+  )
   const dexRows = useMemo(
-    () => toRows(report?.defi.dex_history, "volume"),
-    [report]
+    () => toRows(inRange(report?.defi.dex_history), "volume"),
+    [report, inRange]
   )
-  const revRows = useMemo(() => toRows(report?.defi.rev_history, "rev"), [report])
+  const revRows = useMemo(
+    () => toRows(inRange(report?.defi.rev_history), "rev"),
+    [report, inRange]
+  )
   const xstockRows = useMemo(
-    () => toRows(report?.tokenized.xstocks_history, "aum"),
-    [report]
+    () => toRows(inRange(report?.tokenized.xstocks_history), "aum"),
+    [report, inRange]
   )
 
   if (error) {
@@ -257,6 +310,14 @@ export default function App() {
           ]}
         />
 
+        <Controls
+          range={range}
+          onRange={setRange}
+          onRefresh={load}
+          refreshing={refreshing}
+          updated={relativeTime(loadedAt)}
+        />
+
         <SectionNav
           items={[
             { id: "network", label: "Network" },
@@ -305,20 +366,23 @@ export default function App() {
               label="Transactions per second"
               value={num(n.tps)}
               sub="10-min median, includes votes"
-              spark={sparkOf(history, "tps")}
+              spark={sparkOf(scopedHistory, "tps")}
+              onOpen={() => setOpenMetric("tps")}
             />
             <Tile
               label="Non-vote TPS"
               value={num(n.true_tps)}
               sub="user transactions only"
-              spark={sparkOf(history, "true_tps")}
+              spark={sparkOf(scopedHistory, "true_tps")}
+              onOpen={() => setOpenMetric("true_tps")}
               sparkColor="orange"
             />
             <Tile
               label="Slot time"
               value={`${num(n.slot_time_ms)} ms`}
               sub="target 400 ms"
-              spark={sparkOf(history, "slot_time_ms")}
+              spark={sparkOf(scopedHistory, "slot_time_ms")}
+              onOpen={() => setOpenMetric("slot_time_ms")}
               sparkColor="purple"
             />
             <Tile label="Block height" value={num(n.block_height, 2)} />
@@ -335,7 +399,8 @@ export default function App() {
                 sub={`of 150 slots needed a priority fee · max ${num(
                   n.max_prioritization_fee
                 )} µlam/CU`}
-                spark={sparkOf(history, "prio_congestion_pct")}
+                spark={sparkOf(scopedHistory, "prio_congestion_pct")}
+              onOpen={() => setOpenMetric("prio_congestion_pct")}
               sparkColor="orange"
             />
             )}
@@ -343,7 +408,8 @@ export default function App() {
               label="Circulating supply"
               value={`${num(n.supply.circulating_sol)} SOL`}
               sub={`inflation ${pct(n.inflation_total_pct)}/yr`}
-              spark={sparkOf(history, "circulating_sol")}
+              spark={sparkOf(scopedHistory, "circulating_sol")}
+              onOpen={() => setOpenMetric("circulating_sol")}
               sparkColor="blue"
             />
             {a.median_tx_fee_lamports != null && (
@@ -358,7 +424,8 @@ export default function App() {
                       ).toFixed(5)} · p90 ${int(a.p90_tx_fee_lamports)}`
                     : `p90 ${int(a.p90_tx_fee_lamports)}`
                 }
-                spark={sparkOf(history, "median_tx_fee")}
+                spark={sparkOf(scopedHistory, "median_tx_fee")}
+              onOpen={() => setOpenMetric("median_tx_fee")}
                 sparkColor="orange"
               />
             )}
@@ -367,7 +434,8 @@ export default function App() {
                 label="Paying base fee only"
                 value={pct(a.base_fee_only_pct)}
                 sub={`of ${int(a.fee_sampled_txs)} sampled transactions · the rest bid for priority`}
-                spark={sparkOf(history, "base_fee_only_pct")}
+                spark={sparkOf(scopedHistory, "base_fee_only_pct")}
+              onOpen={() => setOpenMetric("base_fee_only_pct")}
                 sparkColor="green"
               />
             )}
@@ -436,42 +504,48 @@ export default function App() {
             <Tile
               label="Active validators"
               value={int(v.active)}
-              spark={sparkOf(history, "validators_active")}
+              spark={sparkOf(scopedHistory, "validators_active")}
+              onOpen={() => setOpenMetric("validators_active")}
               sparkColor="green"
             />
             <Tile
               label="Delinquent"
               value={int(v.delinquent)}
               sub={`${pct(v.delinquent_stake_pct)} of stake`}
-              spark={sparkOf(history, "validators_delinquent")}
+              spark={sparkOf(scopedHistory, "validators_delinquent")}
+              onOpen={() => setOpenMetric("validators_delinquent")}
               sparkColor="red"
             />
             <Tile
               label="Nakamoto coefficient"
               value={int(v.nakamoto_coefficient)}
               sub="validators to reach 1/3 of stake"
-              spark={sparkOf(history, "nakamoto")}
+              spark={sparkOf(scopedHistory, "nakamoto")}
+              onOpen={() => setOpenMetric("nakamoto")}
               sparkColor="purple"
             />
             <Tile
               label="Total active stake"
               value={`${num(v.total_active_stake_sol)} SOL`}
               sub={`stake-weighted commission ${pct(v.avg_commission)}`}
-              spark={sparkOf(history, "staked_sol")}
+              spark={sparkOf(scopedHistory, "staked_sol")}
+              onOpen={() => setOpenMetric("staked_sol")}
               sparkColor="green"
             />
             <Tile
               label="Top-5 stake share"
               value={pct(v.top5_stake_pct)}
               sub={`top-20: ${pct(v.top20_stake_pct)}`}
-              spark={sparkOf(history, "top5_stake_pct")}
+              spark={sparkOf(scopedHistory, "top5_stake_pct")}
+              onOpen={() => setOpenMetric("top5_stake_pct")}
               sparkColor="purple"
             />
             <Tile
               label="Private validator stake"
               value={pct(v.private_stake_pct)}
               sub="on 100%-commission (self-stake) validators"
-              spark={sparkOf(history, "private_stake_pct")}
+              spark={sparkOf(scopedHistory, "private_stake_pct")}
+              onOpen={() => setOpenMetric("private_stake_pct")}
               sparkColor="orange"
             />
           </Grid>
@@ -535,6 +609,9 @@ export default function App() {
                 />,
                 `${x.commission ?? "-"}%`,
               ])}
+              sortKeys={v.top_validators
+                .slice(0, 12)
+                .map((x, i) => [i + 1, x.vote, x.stake_sol, x.share_pct, x.commission])}
             />
           </Card>
         </Section>
@@ -550,7 +627,8 @@ export default function App() {
                   : undefined
               }
               deltaUp={priceUp}
-              spark={sparkOf(history, "sol_price")}
+              spark={sparkOf(scopedHistory, "sol_price")}
+              onOpen={() => setOpenMetric("sol_price")}
               sparkColor={priceUp ? "green" : "red"}
             />
             <Tile
@@ -559,10 +637,12 @@ export default function App() {
                 m.market_cap_estimated ? " (est.)" : ""
               }`}
               sub={m.market_cap_rank ? `rank #${m.market_cap_rank}` : undefined}
-              spark={sparkOf(history, "market_cap")}
+              spark={sparkOf(scopedHistory, "market_cap")}
+              onOpen={() => setOpenMetric("market_cap")}
               sparkColor="blue"
             />
-            <Tile label="24h volume" value={usd(m.volume_24h_usd)}   spark={sparkOf(history, "volume_24h")}
+            <Tile label="24h volume" value={usd(m.volume_24h_usd)}   spark={sparkOf(scopedHistory, "volume_24h")}
+              onOpen={() => setOpenMetric("volume_24h")}
               sparkColor="orange"
             />
             <Tile
@@ -610,12 +690,14 @@ export default function App() {
             <Tile
               label="Total value locked"
               value={usd(d.tvl_usd)}
-              spark={sparkOf(history, "tvl")}
+              spark={sparkOf(scopedHistory, "tvl")}
+              onOpen={() => setOpenMetric("tvl")}
             />
             <Tile
               label="Stablecoin supply"
               value={usd(d.stablecoins_usd)}
-              spark={sparkOf(history, "stables")}
+              spark={sparkOf(scopedHistory, "stables")}
+              onOpen={() => setOpenMetric("stables")}
               sparkColor="green"
             />
             <Tile
@@ -627,7 +709,8 @@ export default function App() {
                   : undefined
               }
               deltaUp={(d.dex_change_1d_pct ?? 0) >= 0}
-              spark={sparkOf(history, "dex_vol_24h")}
+              spark={sparkOf(scopedHistory, "dex_vol_24h")}
+              onOpen={() => setOpenMetric("dex_vol_24h")}
               sparkColor="orange"
             />
             <Tile
@@ -636,14 +719,16 @@ export default function App() {
               sub={`chain fees ${usd(d.chain_fees_24h_usd)} + MEV tips ${usd(
                 d.jito_tips_24h_usd
               )}`}
-              spark={sparkOf(history, "rev_24h")}
+              spark={sparkOf(scopedHistory, "rev_24h")}
+              onOpen={() => setOpenMetric("rev_24h")}
               sparkColor="green"
             />
             <Tile
               label="App fees 24h"
               value={usd(d.app_fees_24h_usd)}
               sub="every protocol on Solana"
-              spark={sparkOf(history, "app_fees_24h")}
+              spark={sparkOf(scopedHistory, "app_fees_24h")}
+              onOpen={() => setOpenMetric("app_fees_24h")}
               sparkColor="purple"
             />
           </Grid>
@@ -724,6 +809,7 @@ export default function App() {
                     {pct(s.change_7d_pct, true)}
                   </span>,
                 ])}
+                sortKeys={(d.stablecoins_top ?? []).map((x) => [x.symbol, x.on_solana_usd, x.change_7d_pct])}
               />
             </Card>
           </div>
@@ -734,6 +820,7 @@ export default function App() {
                 head={["DEX", "24h volume"]}
                 align="lr"
                 rows={d.dex_top.map((x) => [x.name, usd(x.volume_24h_usd)])}
+                sortKeys={d.dex_top.map((x) => [x.name, x.volume_24h_usd])}
               />
             </Card>
             <Card title="Top apps by fees" note="24h">
@@ -741,6 +828,7 @@ export default function App() {
                 head={["App", "24h fees"]}
                 align="lr"
                 rows={d.top_fee_apps.map((x) => [x.name, usd(x.fees_24h_usd)])}
+                sortKeys={d.top_fee_apps.map((x) => [x.name, x.fees_24h_usd])}
               />
             </Card>
           </div>
@@ -756,7 +844,8 @@ export default function App() {
               label="Activity index"
               value={num(a.activity_index)}
               sub={`unique fee payers per block · ${a.sampled_blocks} blocks sampled over 24h`}
-              spark={sparkOf(history, "activity_idx")}
+              spark={sparkOf(scopedHistory, "activity_idx")}
+              onOpen={() => setOpenMetric("activity_idx")}
               sparkColor="pink"
             />
             <Tile
@@ -769,28 +858,32 @@ export default function App() {
                     : "-"
               }
               sub="capture-recapture estimate"
-              spark={sparkOf(history, "active_cohort")}
+              spark={sparkOf(scopedHistory, "active_cohort")}
+              onOpen={() => setOpenMetric("active_cohort")}
               sparkColor="pink"
             />
             <Tile
               label="xStocks AUM"
               value={usd(tk.xstocks_aum_usd)}
               sub="tokenized equities on Solana"
-              spark={sparkOf(history, "xstocks_aum")}
+              spark={sparkOf(scopedHistory, "xstocks_aum")}
+              onOpen={() => setOpenMetric("xstocks_aum")}
               sparkColor="pink"
             />
             <Tile
               label="xStocks 24h volume"
               value={usd(tk.xstocks_volume_24h_usd)}
               sub={`${num(tk.xstocks_holders)} holders`}
-              spark={sparkOf(history, "xstocks_volume")}
+              spark={sparkOf(scopedHistory, "xstocks_volume")}
+              onOpen={() => setOpenMetric("xstocks_volume")}
               sparkColor="orange"
             />
             <Tile
               label="RWA TVL"
               value={usd(tk.rwa_tvl_usd)}
               sub="all real-world-asset protocols"
-              spark={sparkOf(history, "rwa_tvl")}
+              spark={sparkOf(scopedHistory, "rwa_tvl")}
+              onOpen={() => setOpenMetric("rwa_tvl")}
               sparkColor="blue"
             />
           </Grid>
@@ -820,6 +913,7 @@ export default function App() {
                 head={["Ticker", "AUM"]}
                 align="lr"
                 rows={(tk.xstocks_top ?? []).map((x) => [x.ticker, usd(x.usd)])}
+                sortKeys={(tk.xstocks_top ?? []).map((x) => [x.ticker, x.usd])}
               />
             </Card>
           </div>
@@ -829,7 +923,8 @@ export default function App() {
               head={["Protocol", "TVL on Solana"]}
               align="lr"
               rows={(tk.rwa_top ?? []).map((x) => [x.name, usd(x.usd)])}
-            />
+              sortKeys={(tk.rwa_top ?? []).map((x) => [x.name, x.usd])}
+              />
           </Card>
         </Section>
 
@@ -845,7 +940,8 @@ export default function App() {
                   label="Chain clock drift"
                   value={`${oc.drift_secs > 0 ? "+" : ""}${oc.drift_secs.toFixed(1)} s`}
                   sub="chain time against wall clock; slots run slightly long"
-                  spark={sparkOf(history, "clock_drift_secs")}
+                  spark={sparkOf(scopedHistory, "clock_drift_secs")}
+              onOpen={() => setOpenMetric("clock_drift_secs")}
                   sparkColor="purple"
                 />
               )}
@@ -860,7 +956,8 @@ export default function App() {
                         )} to ${pct(oc.failure_rate_span_pct[1])}`
                       : "across sampled programs"
                   }
-                  spark={sparkOf(history, "failure_rate_pct")}
+                  spark={sparkOf(scopedHistory, "failure_rate_pct")}
+              onOpen={() => setOpenMetric("failure_rate_pct")}
                   sparkColor="red"
                 />
               )}
@@ -869,7 +966,8 @@ export default function App() {
                   label="Unwithdrawn rewards"
                   value={`${num(oc.unwithdrawn_sol_top8, 2)} SOL`}
                   sub="inflation rewards sitting in the top 8 vote accounts"
-                  spark={sparkOf(history, "unwithdrawn_sol")}
+                  spark={sparkOf(scopedHistory, "unwithdrawn_sol")}
+              onOpen={() => setOpenMetric("unwithdrawn_sol")}
               sparkColor="green"
             />
               )}
@@ -903,7 +1001,8 @@ export default function App() {
                     </span>,
                     `${num(p.window_secs, 1)} s`,
                   ])}
-                />
+                  sortKeys={(oc?.programs ?? []).map((p) => [p.name, p.tx_per_min ?? p.tx_per_min_lower_bound ?? null, p.failure_rate_pct, p.window_secs ?? null])}
+              />
               </Card>
             )}
           </Section>
@@ -1078,6 +1177,12 @@ export default function App() {
           </p>
         </footer>
       </div>
+
+      <MetricDialog
+        metricKey={openMetric}
+        history={scopedHistory}
+        onClose={() => setOpenMetric(null)}
+      />
     </div>
   )
 }
