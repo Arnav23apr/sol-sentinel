@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-09 18:22 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-09 19:09 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -11,19 +11,19 @@
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 4.4K |
-| TPS (non-vote) | 2.8K |
-| Slot time | 425.5 ms |
+| TPS (total, 10-min median) | 4.3K |
+| TPS (non-vote) | 2.7K |
+| Slot time | 422.5 ms |
 | Slot | 438M |
 | Block height | 416M |
-| Epoch | 1014 (46.18% complete, ~27.5h remaining) |
+| Epoch | 1014 (47.70% complete, ~26.5h remaining) |
 | Lifetime transactions | 536.6B |
 | Circulating supply | 582.2M SOL |
 | Inflation (annual) | 3.71% |
-| Median transaction fee | 5,495 lamports (about $0.00042) |
-| Transaction fee p90 / p99 | 26,330 / 805,000 lamports |
-| Paying base fee only | 19.70% of 5,237 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 19.30% of slots needed a priority fee (max 5.5M µlam/CU) |
+| Median transaction fee | 5,612 lamports (about $0.00043) |
+| Transaction fee p90 / p99 | 32,936 / 983,170 lamports |
+| Paying base fee only | 16.60% of 5,362 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 24.70% of slots needed a priority fee (max 11.0M µlam/CU) |
 | Node version (RPC) | 4.2.0-rc.1 |
 
 ## Validators & decentralization
@@ -36,7 +36,7 @@
 | Total active stake | 434.0M SOL |
 | Nakamoto coefficient | 18 |
 | Top-5 / Top-10 / Top-20 stake share | 15.41% / 24.39% / 35.74% |
-| Commission (stake-weighted, delegatable validators) | 3.82% |
+| Commission (stake-weighted, delegatable validators) | 3.83% |
 | Stake on private (100% commission) validators | 24.26% |
 
 ### Top validators by stake
@@ -58,10 +58,10 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $77.12 (+1.10% 24h) |
-| Market cap | $44.89B (rank #7) |
-| 24h volume | $1.07B |
-| ATH | $293.31 (-73.71% from ATH) |
+| SOL price | $77.16 (+1.10% 24h) |
+| Market cap | $44.92B (rank #7) |
+| 24h volume | $1.05B |
+| ATH | $293.31 (-73.70% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
@@ -73,8 +73,8 @@
 | DEX volume (24h) | $1.49B (+9.69% 1d) |
 | App fees (24h, all protocols) | $9.27M |
 | Chain fees (24h) | $598.67K |
-| Jito MEV tips (24h) | $126.33K |
-| **REV - Real Economic Value (24h)** | **$725.00K** (chain fees + MEV tips) |
+| Jito MEV tips (24h) | $132.16K |
+| **REV - Real Economic Value (24h)** | **$730.83K** (chain fees + MEV tips) |
 
 ### Top stablecoins on Solana
 
@@ -96,9 +96,9 @@
 | PumpSwap | $688.11M |
 | BisonFi | $114.48M |
 | pump.fun | $69.50M |
-| Raydium AMM | $65.78M |
 | HumidiFi | $64.28M |
-| Meteora DLMM | $60.90M |
+| Raydium AMM | $62.39M |
+| Meteora DLMM | $59.82M |
 | Orca DEX | $59.23M |
 | Axiom | $57.57M |
 
@@ -111,19 +111,19 @@
 | Axiom | $1.05M |
 | Collector Crypt | $487.95K |
 | fomo Wallet | $440.87K |
-| Meteora DLMM | $367.78K |
 | Sanctum Validator LSTs | $364.62K |
+| Meteora DLMM | $327.21K |
 | Binance Staked SOL | $228.17K |
 
 ## Activity & tokenized assets
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 250 |
-| Persistently-active cohort (capture-recapture est.) | 2.3K |
-| Unique payers across sampled blocks | 1.4K (8 blocks over 24h) |
+| Activity index: unique fee payers per block (24h sampled avg) | 256 |
+| Persistently-active cohort (capture-recapture est.) | 2.5K |
+| Unique payers across sampled blocks | 1.5K (8 blocks over 24h) |
 | xStocks tokenized-equity AUM | $370.21M |
-| xStocks 24h DEX volume | $6.16M |
+| xStocks 24h DEX volume | $5.97M |
 | xStocks holders | 258.2K |
 | Total RWA TVL on Solana | $1.83B |
 
@@ -131,19 +131,19 @@ Top tokenized equities: TSLAX ($61.18M), CRCLX ($51.82M), SPYX ($43.52M), MSTRX 
 
 ## Program activity and chain health
 
-Chain clock drift: **+15.8 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
+Chain clock drift: **+14.4 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| SPL Token | 65,570 (approx.) | 41.60% | 0.9 s |
-| Pump.fun | 65,429 (approx.) | 94.20% | 0.9 s |
-| Raydium AMM v4 | 4,686 | 45.00% | 12.8 s |
-| Jupiter v6 | 3,935 | 65.70% | 13.2 s |
-| Orca Whirlpools | 711 | 69.00% | 83.8 s |
+| Pump.fun | 133,207 (approx.) | 94.70% | 0.4 s |
+| SPL Token | 108,071 (approx.) | 36.40% | 0.4 s |
+| Jupiter v6 | 2,515 | 38.20% | 23.2 s |
+| Raydium AMM v4 | 1,337 | 25.10% | 44.8 s |
+| Orca Whirlpools | 729 | 68.60% | 80.3 s |
 
-Median failure rate across the sampled programs: **65.70%** (range 41.60% to 94.20%). This is a consistent trend signal across these five programs, not a chain-wide rate.
+Median failure rate across the sampled programs: **38.20%** (range 25.10% to 94.70%). This is a consistent trend signal across these five programs, not a chain-wide rate.
 
 Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **219.58 SOL**.
 
@@ -153,8 +153,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 493.86K USD | DeFiLlama: 598.67K USD | -19.19% | agree (0.82x), *indicative* |
-| SOL price | coingecko: 77.12 USD | Jupiter (on-chain DEX): 77.12 USD | 0.00% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 516.74K USD | DeFiLlama: 598.67K USD | -14.69% | agree (0.86x), *indicative* |
+| SOL price | coingecko: 77.16 USD | Jupiter (on-chain DEX): 77.13 USD | +0.04% | agree |
 | Circulating supply | getSupply (RPC): 582.17M SOL | CoinGecko: 582.17M SOL | -0.00% | agree |
 
 ## Protocol development
