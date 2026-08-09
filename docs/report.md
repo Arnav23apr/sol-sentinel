@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-09 16:20 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-09 17:02 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -11,19 +11,19 @@
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 4.3K |
+| TPS (total, 10-min median) | 4.2K |
 | TPS (non-vote) | 2.6K |
-| Slot time | 422.5 ms |
+| Slot time | 424 ms |
 | Slot | 438M |
 | Block height | 416M |
-| Epoch | 1014 (42.20% complete, ~29.3h remaining) |
+| Epoch | 1014 (43.54% complete, ~28.7h remaining) |
 | Lifetime transactions | 536.6B |
 | Circulating supply | 582.2M SOL |
 | Inflation (annual) | 3.71% |
-| Median transaction fee | 5,600 lamports (about $0.00043) |
-| Transaction fee p90 / p99 | 20,000 / 605,000 lamports |
-| Paying base fee only | 16.10% of 7,606 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 22.00% of slots needed a priority fee (max 19.2M µlam/CU) |
+| Median transaction fee | 5,454 lamports (about $0.00042) |
+| Transaction fee p90 / p99 | 19,199 / 605,000 lamports |
+| Paying base fee only | 20.60% of 6,734 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 15.30% of slots needed a priority fee (max 4.2M µlam/CU) |
 | Node version (RPC) | 4.2.0-rc.1 |
 
 ## Validators & decentralization
@@ -58,8 +58,8 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $77.26 (+1.00% 24h) |
-| Market cap | $44.99B (rank #7) |
+| SOL price | $77.25 (+1.20% 24h) |
+| Market cap | $44.97B (rank #7) |
 | 24h volume | $1.08B |
 | ATH | $293.31 (-73.66% from ATH) |
 | Price source | coingecko |
@@ -68,13 +68,13 @@
 
 | Metric | Value |
 |---|---|
-| TVL | $4.83B |
+| TVL | $4.85B |
 | Stablecoin supply | $15.67B |
 | DEX volume (24h) | $1.49B (+9.69% 1d) |
 | App fees (24h, all protocols) | $9.27M |
 | Chain fees (24h) | $598.67K |
-| Jito MEV tips (24h) | $122.42K |
-| **REV - Real Economic Value (24h)** | **$721.10K** (chain fees + MEV tips) |
+| Jito MEV tips (24h) | $124.68K |
+| **REV - Real Economic Value (24h)** | **$723.35K** (chain fees + MEV tips) |
 
 ### Top stablecoins on Solana
 
@@ -85,9 +85,9 @@
 | USDGO | $1.14B | +2.42% |
 | USD1 | $1.04B | +1.74% |
 | BUIDL | $712.22M | +5.52% |
-| PYUSD | $683.86M | -0.27% |
-| USDG | $632.50M | -1.68% |
-| USDe | $538.88M | -0.31% |
+| PYUSD | $683.76M | -0.27% |
+| USDG | $632.50M | -1.66% |
+| USDe | $539.00M | -0.31% |
 
 ### Top DEXs by 24h volume
 
@@ -97,9 +97,9 @@
 | BisonFi | $114.48M |
 | pump.fun | $69.50M |
 | HumidiFi | $64.28M |
-| Raydium AMM | $60.78M |
-| Orca DEX | $60.19M |
-| Meteora DLMM | $59.46M |
+| Meteora DLMM | $63.18M |
+| Raydium AMM | $62.95M |
+| Orca DEX | $59.23M |
 | Axiom | $57.57M |
 
 ### Top apps by 24h fees
@@ -112,38 +112,38 @@
 | fomo Wallet | $440.87K |
 | Collector Crypt | $437.24K |
 | Sanctum Validator LSTs | $364.62K |
-| Meteora DLMM | $298.10K |
+| Meteora DLMM | $303.39K |
 | Binance Staked SOL | $228.17K |
 
 ## Activity & tokenized assets
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 308 |
-| Persistently-active cohort (capture-recapture est.) | 3.1K |
-| Unique payers across sampled blocks | 1.8K (8 blocks over 24h) |
+| Activity index: unique fee payers per block (24h sampled avg) | 326 |
+| Persistently-active cohort (capture-recapture est.) | 3.3K |
+| Unique payers across sampled blocks | 1.9K (8 blocks over 24h) |
 | xStocks tokenized-equity AUM | $369.91M |
-| xStocks 24h DEX volume | $7.14M |
-| xStocks holders | 258.7K |
+| xStocks 24h DEX volume | $7.03M |
+| xStocks holders | 258.5K |
 | Total RWA TVL on Solana | $1.83B |
 
 Top tokenized equities: TSLAX ($61.08M), CRCLX ($51.66M), SPYX ($43.51M), MSTRX ($38.69M), QQQX ($28.90M)
 
 ## Program activity and chain health
 
-Chain clock drift: **+15.4 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
+Chain clock drift: **+15.3 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| SPL Token | >142,012 | 41.20% | 0.4 s |
-| Pump.fun | 135,621 (approx.) | 95.20% | 0.4 s |
-| Orca Whirlpools | 6,365 | 70.30% | 9.3 s |
-| Jupiter v6 | 4,131 | 54.20% | 13.9 s |
-| Raydium AMM v4 | 908 | 21.70% | 65.5 s |
+| SPL Token | 84,906 (approx.) | 41.00% | 0.4 s |
+| Pump.fun | 18,235 | 78.70% | 3 s |
+| Jupiter v6 | 3,642 | 50.60% | 16.1 s |
+| Raydium AMM v4 | 2,195 | 41.40% | 26.7 s |
+| Orca Whirlpools | 1,258 | 63.50% | 46.6 s |
 
-Median failure rate across the sampled programs: **54.20%** (range 21.70% to 95.20%). This is a consistent trend signal across these five programs, not a chain-wide rate.
+Median failure rate across the sampled programs: **50.60%** (range 41.00% to 78.70%). This is a consistent trend signal across these five programs, not a chain-wide rate.
 
 Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **219.58 SOL**.
 
@@ -153,8 +153,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 999.80K USD | DeFiLlama: 598.67K USD | +50.19% | agree (1.67x), *indicative* |
-| SOL price | coingecko: 77.26 USD | Jupiter (on-chain DEX): 77.17 USD | +0.12% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 563.70K USD | DeFiLlama: 598.67K USD | -6.02% | agree (0.94x), *indicative* |
+| SOL price | coingecko: 77.25 USD | Jupiter (on-chain DEX): 77.17 USD | +0.10% | agree |
 | Circulating supply | getSupply (RPC): 582.17M SOL | CoinGecko: 582.17M SOL | -0.00% | agree |
 
 ## Protocol development
