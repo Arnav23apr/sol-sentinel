@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-10 19:27 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-10 20:07 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -12,18 +12,18 @@
 |---|---|
 | RPC health | ok |
 | TPS (total, 10-min median) | 4.1K |
-| TPS (non-vote) | 2.4K |
-| Slot time | 424 ms |
+| TPS (non-vote) | 2.5K |
+| Slot time | 419.6 ms |
 | Slot | 438M |
 | Block height | 417M |
-| Epoch | 1014 (95.60% complete, ~2.2h remaining) |
+| Epoch | 1014 (96.93% complete, ~1.5h remaining) |
 | Lifetime transactions | 536.9B |
 | Circulating supply | 582.2M SOL |
 | Inflation (annual) | 3.71% |
-| Median transaction fee | 5,500 lamports (about $0.00042) |
-| Transaction fee p90 / p99 | 23,289 / 605,000 lamports |
-| Paying base fee only | 17.70% of 6,675 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 16.70% of slots needed a priority fee (max 2.5M µlam/CU) |
+| Median transaction fee | 5,469 lamports (about $0.00042) |
+| Transaction fee p90 / p99 | 28,920 / 625,000 lamports |
+| Paying base fee only | 18.90% of 6,943 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 18.00% of slots needed a priority fee (max 5.5M µlam/CU) |
 | Node version (RPC) | 4.2.0-rc.1 |
 
 ## Validators & decentralization
@@ -58,17 +58,17 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $75.97 (-1.80% 24h) |
-| Market cap | $44.23B (rank #7) |
-| 24h volume | $1.44B |
-| ATH | $293.31 (-74.10% from ATH) |
+| SOL price | $76.19 (-1.40% 24h) |
+| Market cap | $44.35B (rank #7) |
+| 24h volume | $1.45B |
+| ATH | $293.31 (-74.03% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
 
 | Metric | Value |
 |---|---|
-| TVL | $4.82B |
+| TVL | $4.81B |
 | Stablecoin supply | $15.58B |
 | DEX volume (24h) | $1.35B (-9.76% 1d) |
 | App fees (24h, all protocols) | $9.10M |
@@ -110,7 +110,7 @@
 | pump.fun | $1.47M |
 | Axiom | $1.35M |
 | fomo Wallet | $444.27K |
-| Meteora DLMM | $350.96K |
+| Meteora DLMM | $341.42K |
 | Collector Crypt | $314.00K |
 | Raydium AMM | $243.84K |
 | Terminal | $177.24K |
@@ -119,31 +119,31 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 304 |
-| Persistently-active cohort (capture-recapture est.) | 2.8K |
+| Activity index: unique fee payers per block (24h sampled avg) | 311 |
+| Persistently-active cohort (capture-recapture est.) | 2.7K |
 | Unique payers across sampled blocks | 1.7K (8 blocks over 24h) |
-| xStocks tokenized-equity AUM | $370.41M |
-| xStocks 24h DEX volume | $22.43M |
+| xStocks tokenized-equity AUM | $369.71M |
+| xStocks 24h DEX volume | $20.96M |
 | xStocks holders | 258.9K |
 | Total RWA TVL on Solana | $1.83B |
 
-Top tokenized equities: TSLAX ($60.29M), CRCLX ($49.74M), SPYX ($43.58M), MSTRX ($37.03M), QQQX ($28.74M)
+Top tokenized equities: TSLAX ($60.14M), CRCLX ($49.83M), SPYX ($43.54M), MSTRX ($36.80M), QQQX ($28.68M)
 
 ## Program activity and chain health
 
-Chain clock drift: **+15.5 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
+Chain clock drift: **+15.2 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| SPL Token | 66,651 (approx.) | 52.40% | 0.8 s |
-| Pump.fun | 66,580 (approx.) | 95.70% | 0.8 s |
-| Jupiter v6 | 2,796 | 47.00% | 21.2 s |
-| Orca Whirlpools | 933 | 56.90% | 64 s |
-| Raydium AMM v4 | 888 | 32.50% | 67 s |
+| Pump.fun | 72,641 (approx.) | 95.90% | 0.4 s |
+| SPL Token | 34,604 | 28.20% | 1.7 s |
+| Jupiter v6 | 1,587 | 30.50% | 37.8 s |
+| Raydium AMM v4 | 721 | 20.20% | 83.1 s |
+| Orca Whirlpools | 702 | 53.10% | 83.9 s |
 
-Median failure rate across the sampled programs: **52.40%** (range 32.50% to 95.70%). This is a consistent trend signal across these five programs, not a chain-wide rate.
+Median failure rate across the sampled programs: **30.50%** (range 20.20% to 95.90%). This is a consistent trend signal across these five programs, not a chain-wide rate.
 
 Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **35.26 SOL**.
 
@@ -153,8 +153,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 425.72K USD | DeFiLlama: 650.66K USD | -41.80% | agree (0.65x), *indicative* |
-| SOL price | coingecko: 75.97 USD | Jupiter (on-chain DEX): 75.99 USD | -0.03% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 1.40M USD | DeFiLlama: 650.66K USD | +73.15% | agree (2.15x), *indicative* |
+| SOL price | coingecko: 76.19 USD | Jupiter (on-chain DEX): 76.19 USD | 0.00% | agree |
 | Circulating supply | getSupply (RPC): 582.16M SOL | CoinGecko: 582.16M SOL | -0.00% | agree |
 
 ## Protocol development
