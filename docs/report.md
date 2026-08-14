@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-14 11:35 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-14 12:38 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -11,19 +11,19 @@
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 3.0K |
+| TPS (total, 10-min median) | 2.9K |
 | TPS (non-vote) | 1.3K |
-| Slot time | 415.2 ms |
+| Slot time | 411 ms |
 | Slot | 439M |
 | Block height | 417M |
-| Epoch | 1016 (70.90% complete, ~14.5h remaining) |
+| Epoch | 1016 (73.00% complete, ~13.3h remaining) |
 | Lifetime transactions | 538.1B |
 | Circulating supply | 582.6M SOL |
 | Inflation (annual) | 3.70% |
-| Median transaction fee | 5,473 lamports (about $0.00041) |
-| Transaction fee p90 / p99 | 25,994 / 805,000 lamports |
-| Paying base fee only | 13.80% of 6,853 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 6.70% of slots needed a priority fee (max 2.5M µlam/CU) |
+| Median transaction fee | 5,408 lamports (about $0.00041) |
+| Transaction fee p90 / p99 | 21,568 / 610,000 lamports |
+| Paying base fee only | 15.70% of 6,900 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 6.00% of slots needed a priority fee (max 2.7M µlam/CU) |
 | Node version (RPC) | 4.2.0 |
 
 ## Validators & decentralization
@@ -58,7 +58,7 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $75.46 (-0.80% 24h) |
+| SOL price | $75.46 (-0.30% 24h) |
 | Market cap | $43.96B (rank #7) |
 | 24h volume | $1.10B |
 | ATH | $293.31 (-74.27% from ATH) |
@@ -68,26 +68,26 @@
 
 | Metric | Value |
 |---|---|
-| TVL | $4.83B |
-| Stablecoin supply | $15.50B |
+| TVL | $4.82B |
+| Stablecoin supply | $15.48B |
 | DEX volume (24h) | $1.94B (+12.58% 1d) |
 | App fees (24h, all protocols) | $10.08M |
 | Chain fees (24h) | $709.83K |
-| Jito MEV tips (24h) | $118.26K |
-| **REV - Real Economic Value (24h)** | **$828.09K** (chain fees + MEV tips) |
+| Jito MEV tips (24h) | $117.92K |
+| **REV - Real Economic Value (24h)** | **$827.75K** (chain fees + MEV tips) |
 
 ### Top stablecoins on Solana
 
 | Symbol | $ on Solana | 7d Δ |
 |---|---|---|
-| USDC | $6.75B | -4.12% |
+| USDC | $6.72B | -4.47% |
 | USDT | $2.95B | -6.33% |
 | USDGO | $1.18B | +4.74% |
 | USD1 | $1.05B | +2.92% |
 | BUIDL | $740.89M | +6.28% |
-| PYUSD | $676.66M | -0.84% |
-| USDG | $635.07M | -1.24% |
-| USDe | $537.95M | -0.14% |
+| PYUSD | $676.75M | -0.84% |
+| USDG | $635.07M | -1.23% |
+| USDe | $538.01M | -0.14% |
 
 ### Top DEXs by 24h volume
 
@@ -98,9 +98,9 @@
 | HumidiFi | $126.58M |
 | Orca DEX | $108.21M |
 | pump.fun | $83.54M |
-| Raydium AMM | $82.71M |
-| Manifest Trade | $81.43M |
-| Meteora DLMM | $75.77M |
+| Raydium AMM | $82.88M |
+| Manifest Trade | $82.35M |
+| Meteora DLMM | $75.99M |
 
 ### Top apps by 24h fees
 
@@ -112,38 +112,38 @@
 | Collector Crypt | $446.19K |
 | fomo Wallet | $382.68K |
 | Sanctum Validator LSTs | $365.14K |
-| Meteora DLMM | $288.23K |
+| Meteora DLMM | $285.81K |
 | Binance Staked SOL | $228.50K |
 
 ## Activity & tokenized assets
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 281 |
+| Activity index: unique fee payers per block (24h sampled avg) | 293 |
 | Persistently-active cohort (capture-recapture est.) | 2.4K |
 | Unique payers across sampled blocks | 1.6K (8 blocks over 24h) |
-| xStocks tokenized-equity AUM | $383.33M |
-| xStocks 24h DEX volume | $21.31M |
+| xStocks tokenized-equity AUM | $384.18M |
+| xStocks 24h DEX volume | $21.60M |
 | xStocks holders | 266.1K |
 | Total RWA TVL on Solana | $1.87B |
 
-Top tokenized equities: TSLAX ($62.84M), CRCLX ($54.72M), SPYX ($44.15M), MSTRX ($38.21M), GOOGLX ($30.22M)
+Top tokenized equities: TSLAX ($62.99M), CRCLX ($55.13M), SPYX ($44.16M), MSTRX ($38.35M), GOOGLX ($30.22M)
 
 ## Program activity and chain health
 
-Chain clock drift: **+15.3 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
+Chain clock drift: **+15.5 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| SPL Token | 29,335 | 31.80% | 1.7 s |
-| Pump.fun | 20,190 | 86.30% | 2.9 s |
-| Jupiter v6 | 2,287 | 52.60% | 26.2 s |
-| Orca Whirlpools | 656 | 55.20% | 91.3 s |
-| Raydium AMM v4 | 617 | 26.40% | 97.2 s |
+| SPL Token | 43,698 | 20.20% | 1.2 s |
+| Pump.fun | 35,912 | 90.60% | 1.6 s |
+| Jupiter v6 | 2,701 | 49.80% | 22.2 s |
+| Orca Whirlpools | 2,140 | 64.30% | 27.9 s |
+| Raydium AMM v4 | 804 | 34.10% | 74.4 s |
 
-Median failure rate across the sampled programs: **52.60%** (range 26.40% to 86.30%). This is a consistent trend signal across these five programs, not a chain-wide rate.
+Median failure rate across the sampled programs: **49.80%** (range 20.20% to 90.60%). This is a consistent trend signal across these five programs, not a chain-wide rate.
 
 Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **35.27 SOL**.
 
@@ -153,8 +153,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 583.70K USD | DeFiLlama: 709.83K USD | -19.50% | agree (0.82x), *indicative* |
-| SOL price | coingecko: 75.46 USD | Jupiter (on-chain DEX): 75.44 USD | +0.03% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 524.82K USD | DeFiLlama: 709.83K USD | -29.97% | agree (0.74x), *indicative* |
+| SOL price | coingecko: 75.46 USD | Jupiter (on-chain DEX): 75.36 USD | +0.13% | agree |
 | Circulating supply | getSupply (RPC): 582.61M SOL | CoinGecko: 582.61M SOL | -0.00% | agree |
 
 ## Protocol development
