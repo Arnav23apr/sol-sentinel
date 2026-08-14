@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-14 12:38 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-14 14:07 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -11,19 +11,19 @@
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 2.9K |
-| TPS (non-vote) | 1.3K |
-| Slot time | 411 ms |
+| TPS (total, 10-min median) | 4.3K |
+| TPS (non-vote) | 2.6K |
+| Slot time | 416.7 ms |
 | Slot | 439M |
 | Block height | 417M |
-| Epoch | 1016 (73.00% complete, ~13.3h remaining) |
+| Epoch | 1016 (75.97% complete, ~12.0h remaining) |
 | Lifetime transactions | 538.1B |
 | Circulating supply | 582.6M SOL |
 | Inflation (annual) | 3.70% |
-| Median transaction fee | 5,408 lamports (about $0.00041) |
-| Transaction fee p90 / p99 | 21,568 / 610,000 lamports |
-| Paying base fee only | 15.70% of 6,900 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 6.00% of slots needed a priority fee (max 2.7M µlam/CU) |
+| Median transaction fee | 5,500 lamports (about $0.00041) |
+| Transaction fee p90 / p99 | 32,107 / 1,005,000 lamports |
+| Paying base fee only | 21.10% of 5,507 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 23.30% of slots needed a priority fee (max 4.1M µlam/CU) |
 | Node version (RPC) | 4.2.0 |
 
 ## Validators & decentralization
@@ -58,10 +58,10 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $75.46 (-0.30% 24h) |
-| Market cap | $43.96B (rank #7) |
+| SOL price | $75.26 (-1.10% 24h) |
+| Market cap | $43.86B (rank #7) |
 | 24h volume | $1.10B |
-| ATH | $293.31 (-74.27% from ATH) |
+| ATH | $293.31 (-74.34% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
@@ -80,14 +80,14 @@
 
 | Symbol | $ on Solana | 7d Δ |
 |---|---|---|
-| USDC | $6.72B | -4.47% |
+| USDC | $6.71B | -4.59% |
 | USDT | $2.95B | -6.33% |
 | USDGO | $1.18B | +4.74% |
 | USD1 | $1.05B | +2.92% |
 | BUIDL | $740.89M | +6.28% |
-| PYUSD | $676.75M | -0.84% |
-| USDG | $635.07M | -1.23% |
-| USDe | $538.01M | -0.14% |
+| PYUSD | $676.23M | -0.91% |
+| USDG | $634.80M | -1.30% |
+| USDe | $538.07M | -0.14% |
 
 ### Top DEXs by 24h volume
 
@@ -96,11 +96,11 @@
 | PumpSwap | $866.70M |
 | BisonFi | $178.89M |
 | HumidiFi | $126.58M |
-| Orca DEX | $108.21M |
+| Orca DEX | $105.83M |
 | pump.fun | $83.54M |
-| Raydium AMM | $82.88M |
-| Manifest Trade | $82.35M |
-| Meteora DLMM | $75.99M |
+| Manifest Trade | $82.39M |
+| Raydium AMM | $80.86M |
+| Meteora DLMM | $76.64M |
 
 ### Top apps by 24h fees
 
@@ -119,31 +119,31 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 293 |
-| Persistently-active cohort (capture-recapture est.) | 2.4K |
-| Unique payers across sampled blocks | 1.6K (8 blocks over 24h) |
+| Activity index: unique fee payers per block (24h sampled avg) | 307 |
+| Persistently-active cohort (capture-recapture est.) | 3.2K |
+| Unique payers across sampled blocks | 1.8K (8 blocks over 24h) |
 | xStocks tokenized-equity AUM | $384.18M |
-| xStocks 24h DEX volume | $21.60M |
-| xStocks holders | 266.1K |
+| xStocks 24h DEX volume | $23.00M |
+| xStocks holders | 266.6K |
 | Total RWA TVL on Solana | $1.87B |
 
 Top tokenized equities: TSLAX ($62.99M), CRCLX ($55.13M), SPYX ($44.16M), MSTRX ($38.35M), GOOGLX ($30.22M)
 
 ## Program activity and chain health
 
-Chain clock drift: **+15.5 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
+Chain clock drift: **+15.0 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| SPL Token | 43,698 | 20.20% | 1.2 s |
-| Pump.fun | 35,912 | 90.60% | 1.6 s |
-| Jupiter v6 | 2,701 | 49.80% | 22.2 s |
-| Orca Whirlpools | 2,140 | 64.30% | 27.9 s |
-| Raydium AMM v4 | 804 | 34.10% | 74.4 s |
+| SPL Token | 118,215 (approx.) | 66.10% | 0.4 s |
+| Pump.fun | 6,303 | 58.20% | 9.2 s |
+| Jupiter v6 | 5,290 | 68.10% | 11.3 s |
+| Orca Whirlpools | 4,473 | 32.30% | 13.3 s |
+| Raydium AMM v4 | 1,033 | 26.60% | 57.9 s |
 
-Median failure rate across the sampled programs: **49.80%** (range 20.20% to 90.60%). This is a consistent trend signal across these five programs, not a chain-wide rate.
+Median failure rate across the sampled programs: **58.20%** (range 26.60% to 68.10%). This is a consistent trend signal across these five programs, not a chain-wide rate.
 
 Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **35.27 SOL**.
 
@@ -153,8 +153,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 524.82K USD | DeFiLlama: 709.83K USD | -29.97% | agree (0.74x), *indicative* |
-| SOL price | coingecko: 75.46 USD | Jupiter (on-chain DEX): 75.36 USD | +0.13% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 475.76K USD | DeFiLlama: 709.83K USD | -39.48% | agree (0.67x), *indicative* |
+| SOL price | coingecko: 75.26 USD | Jupiter (on-chain DEX): 75.21 USD | +0.07% | agree |
 | Circulating supply | getSupply (RPC): 582.61M SOL | CoinGecko: 582.61M SOL | -0.00% | agree |
 
 ## Protocol development
@@ -202,3 +202,11 @@ Quantities that two independent sources can both see, compared against each othe
 ---
 
 **Data sources (all keyless):** Solana JSON-RPC (mainnet-beta + publicnode fallback), DeFiLlama, CoinGecko (Jupiter/Binance/Coinbase fallbacks), GitHub REST, solana.com & Helius RSS.
+
+⚠️ *Sections served from the previous snapshot due to source errors this run: dev.*
+
+<details><summary>Collection errors this run</summary>
+
+- `dev`: `FetchError('https://api.github.com/repos/solana-foundation/solana-improvement-documents/pulls?state=open&per_page=30 -> HTTP 403')`
+
+</details>
