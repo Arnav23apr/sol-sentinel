@@ -1,6 +1,6 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-15 06:18 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-15 07:04 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
@@ -11,19 +11,19 @@
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 2.6K |
-| TPS (non-vote) | 1.1K |
-| Slot time | 415.2 ms |
+| TPS (total, 10-min median) | 2.7K |
+| TPS (non-vote) | 1.0K |
+| Slot time | 411 ms |
 | Slot | 439M |
 | Block height | 417M |
-| Epoch | 1017 (8.42% complete, ~45.6h remaining) |
+| Epoch | 1017 (9.93% complete, ~44.4h remaining) |
 | Lifetime transactions | 538.3B |
 | Circulating supply | 582.7M SOL |
 | Inflation (annual) | 3.69% |
-| Median transaction fee | 5,514 lamports (about $0.00041) |
-| Transaction fee p90 / p99 | 21,166 / 1,004,000 lamports |
-| Paying base fee only | 18.90% of 5,117 sampled transactions |
-| AMM write-lock congestion (150-slot window) | 12.00% of slots needed a priority fee (max 1.7M µlam/CU) |
+| Median transaction fee | 5,319 lamports (about $0.00040) |
+| Transaction fee p90 / p99 | 21,166 / 528,300 lamports |
+| Paying base fee only | 20.70% of 4,942 sampled transactions |
+| AMM write-lock congestion (150-slot window) | 10.70% of slots needed a priority fee (max 13.7M µlam/CU) |
 | Node version (RPC) | 4.2.0 |
 
 ## Validators & decentralization
@@ -58,10 +58,10 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $75.25 (-0.70% 24h) |
-| Market cap | $43.85B (rank #7) |
-| 24h volume | $1.06B |
-| ATH | $293.31 (-74.34% from ATH) |
+| SOL price | $75.35 (-0.60% 24h) |
+| Market cap | $43.91B (rank #7) |
+| 24h volume | $1.03B |
+| ATH | $293.31 (-74.31% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
@@ -70,7 +70,7 @@
 |---|---|
 | TVL | $4.82B |
 | Stablecoin supply | $15.41B |
-| DEX volume (24h) | $1.64B (-15.47% 1d) |
+| DEX volume (24h) | $1.64B (-15.57% 1d) |
 | App fees (24h, all protocols) | $8.00M |
 | Chain fees (24h) | $602.88K |
 | Jito MEV tips (24h) | $96.31K |
@@ -80,14 +80,14 @@
 
 | Symbol | $ on Solana | 7d Δ |
 |---|---|---|
-| USDC | $6.72B | -6.14% |
+| USDC | $6.71B | -6.21% |
 | USDT | $2.90B | -2.03% |
 | USDGO | $1.19B | +4.25% |
 | USD1 | $1.05B | +1.18% |
 | BUIDL | $740.96M | +4.04% |
-| PYUSD | $678.56M | -0.88% |
-| USDG | $629.49M | -3.02% |
-| USDe | $538.31M | -0.17% |
+| PYUSD | $678.63M | -0.88% |
+| USDG | $629.54M | -3.02% |
+| USDe | $538.27M | -0.17% |
 
 ### Top DEXs by 24h volume
 
@@ -96,10 +96,10 @@
 | PumpSwap | $597.50M |
 | BisonFi | $156.52M |
 | HumidiFi | $118.79M |
-| Raydium AMM | $83.85M |
 | Orca DEX | $83.51M |
 | pump.fun | $81.83M |
-| Manifest Trade | $78.71M |
+| Raydium AMM | $80.48M |
+| Manifest Trade | $75.06M |
 | Axiom | $72.59M |
 
 ### Top apps by 24h fees
@@ -112,18 +112,18 @@
 | Collector Crypt | $487.55K |
 | fomo Wallet | $382.68K |
 | Meteora DLMM | $281.38K |
-| Raydium AMM | $248.22K |
+| Raydium AMM | $243.59K |
 | pump.fun Mobile App | $155.19K |
 
 ## Activity & tokenized assets
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 277 |
+| Activity index: unique fee payers per block (24h sampled avg) | 269 |
 | Persistently-active cohort (capture-recapture est.) | 2.5K |
-| Unique payers across sampled blocks | 1.6K (8 blocks over 24h) |
+| Unique payers across sampled blocks | 1.5K (8 blocks over 24h) |
 | xStocks tokenized-equity AUM | $380.11M |
-| xStocks 24h DEX volume | $19.40M |
+| xStocks 24h DEX volume | $19.30M |
 | xStocks holders | 267.2K |
 | Total RWA TVL on Solana | $1.87B |
 
@@ -131,21 +131,21 @@ Top tokenized equities: TSLAX ($62.08M), CRCLX ($52.01M), SPYX ($44.96M), MSTRX 
 
 ## Program activity and chain health
 
-Chain clock drift: **+14.6 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
+Chain clock drift: **+15.3 s** against wall clock (slots run slightly longer than the nominal 400 ms, so chain time falls behind real time).
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| Pump.fun | 32,370 | 94.90% | 1.7 s |
-| SPL Token | 25,347 | 24.00% | 2.1 s |
-| Jupiter v6 | 1,080 | 29.70% | 55.2 s |
-| Orca Whirlpools | 829 | 15.10% | 71.8 s |
-| Raydium AMM v4 | 736 | 30.80% | 81.4 s |
+| SPL Token | 35,718 | 24.20% | 1.2 s |
+| Pump.fun | 13,810 | 87.90% | 4.1 s |
+| Jupiter v6 | 1,210 | 29.40% | 48.1 s |
+| Orca Whirlpools | 936 | 38.30% | 63.7 s |
+| Raydium AMM v4 | 788 | 14.50% | 76 s |
 
-Median failure rate across the sampled programs: **29.70%** (range 15.10% to 94.90%). This is a consistent trend signal across these five programs, not a chain-wide rate.
+Median failure rate across the sampled programs: **29.40%** (range 14.50% to 87.90%). This is a consistent trend signal across these five programs, not a chain-wide rate.
 
-Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **813.74 SOL**.
+Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **768.50 SOL**.
 
 ## Cross-source validation
 
@@ -153,8 +153,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 489.49K USD | DeFiLlama: 602.88K USD | -20.76% | agree (0.81x), *indicative* |
-| SOL price | coingecko: 75.25 USD | Jupiter (on-chain DEX): 75.24 USD | +0.01% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 378.89K USD | DeFiLlama: 602.88K USD | -45.63% | agree (0.63x), *indicative* |
+| SOL price | coingecko: 75.35 USD | Jupiter (on-chain DEX): 75.33 USD | +0.03% | agree |
 | Circulating supply | getSupply (RPC): 582.73M SOL | CoinGecko: 582.73M SOL | -0.00% | agree |
 
 ## Protocol development
