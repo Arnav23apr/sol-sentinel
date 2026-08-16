@@ -64,6 +64,21 @@ SERIES = {
     "xstocks_aum": "xStocks AUM",
 }
 
+# Pairs whose relationship is definitional rather than empirical. Reporting
+# them is worse than reporting nothing: "total TPS moves with non-vote TPS"
+# scored +0.99 and took the top slot, but non-vote TPS is a *component* of
+# total TPS computed from the same sample, so the correlation is arithmetic,
+# not a finding. Likewise the fee pair below is derived from one sorted array.
+DEFINITIONAL_PAIRS = {
+    frozenset(("tps", "true_tps")),
+    frozenset(("median_tx_fee", "base_fee_only_pct")),
+    frozenset(("median_tx_fee", "p90_tx_fee")),
+    frozenset(("rev_24h", "app_fees_24h")),
+    frozenset(("fees_24h", "app_fees_24h")),
+    frozenset(("market_cap", "sol_price")),
+    frozenset(("circulating_sol", "market_cap")),
+}
+
 # Two-sided 95% Student-t critical values by degrees of freedom, for turning a
 # sample size into a minimum believable correlation. scipy is unavailable
 # under the stdlib-only rule, so the table is inline.
@@ -242,8 +257,12 @@ def correlations(rows: Optional[list] = None) -> dict:
                >= MIN_POINTS + 1]
 
     pairs = []
+    excluded = 0
     for i, a in enumerate(present):
         for b in present[i + 1:]:
+            if frozenset((a, b)) in DEFINITIONAL_PAIRS:
+                excluded += 1
+                continue
             da, db = _aligned_changes(rows, a, b)
             if len(da) < MIN_POINTS:
                 continue
@@ -275,6 +294,7 @@ def correlations(rows: Optional[list] = None) -> dict:
                    "across all pairs tested"),
         "metrics_considered": len(present),
         "pairs_tested": len(pairs),
+        "pairs_excluded_definitional": excluded,
         "significant_count": len(strong),
         "top": strong[:12],
         # Reported so a reader can see how much was tested to find this much,

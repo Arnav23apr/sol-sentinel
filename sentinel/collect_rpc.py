@@ -125,6 +125,8 @@ def network() -> dict:
                                                      len(vals) - 1)]
             out["max_prioritization_fee"] = vals[-1]
             out["prio_fee_nonzero_pct"] = round(len(nonzero) / len(vals) * 100, 1)
+            # The RPC decides how many slots it returns; do not claim 150.
+            out["prio_fee_slots"] = len(vals)
     except (FetchError, KeyError, IndexError):
         pass
 

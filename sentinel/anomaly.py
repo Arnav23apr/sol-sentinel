@@ -23,8 +23,17 @@ from typing import Optional
 
 from . import history
 
-WINDOW = 336          # baseline window: ~7 days at a 30-min cadence
+# The baseline is sliced by TIME, not by row count. It was 336 rows, described
+# everywhere as "7 days at a 30-minute cadence" — but GitHub throttles
+# scheduled workflows, and the measured cadence is nearer 54 minutes, so 336
+# rows was really about 12.5 days. Slicing by time makes the published phrase
+# true by construction whatever the scheduler does.
+BASELINE_DAYS = 7
+BASELINE_SECS = BASELINE_DAYS * 86_400
 MIN_BASELINE = 12     # need at least this many points before flagging
+# Below this the window is too short to call a "7-day" baseline, so findings
+# describe the span they actually used instead.
+MIN_SPAN_HOURS_FOR_LABEL = 5 * 24
 Z_WARNING = 3.5
 Z_CRITICAL = 6.0
 
@@ -52,7 +61,7 @@ WATCHED = {
     "tvl": ("DeFi TVL", "USD", "both", 5.0),
     "stables": ("Stablecoin supply", "USD", "both", 3.0),
     "dex_vol_24h": ("DEX volume (24h)", "USD", "both", 25.0),
-    "fees_24h": ("Network fees (24h)", "USD", "both", 25.0),
+    "fees_24h": ("App fees (24h, all protocols)", "USD", "both", 25.0),
     "activity_idx": ("Activity index (fee payers per block)", "", "both", 25.0),
     # Fees spiking is congestion worth flagging; fees falling is not an
     # incident, so this one is watched in the spike direction only.
@@ -90,10 +99,13 @@ def detect(rows: list[dict], latest: dict) -> list[dict]:
         value = latest.get(key)
         if value is None or isinstance(value, bool) or not isinstance(value, (int, float)):
             continue
-        window = [v for _, v in history.series(rows, key)][-WINDOW:]
+        cutoff = now - BASELINE_SECS
+        pairs = [(t, v) for t, v in history.series(rows, key) if t >= cutoff]
+        window = [v for _, v in pairs]
         # Exclude the point being scored if it is already in the window.
         if window and window[-1] == value:
-            window = window[:-1]
+            window, pairs = window[:-1], pairs[:-1]
+        span_hours = round((pairs[-1][0] - pairs[0][0]) / 3600, 1) if len(pairs) > 1 else 0.0
         z = robust_z(float(value), window)
         if z is None:
             continue
@@ -118,6 +130,11 @@ def detect(rows: list[dict], latest: dict) -> list[dict]:
 
         unit_s = (" " + unit) if unit else ""
         way = "above" if z > 0 else "below"
+        # Only claim a seven-day baseline when the samples actually span one.
+        base_desc = (f"{BASELINE_DAYS}-day baseline"
+                     if span_hours >= MIN_SPAN_HOURS_FOR_LABEL
+                     else f"baseline of {len(window)} samples over "
+                          f"the last {span_hours:.0f}h")
         move = f" a {change_pct:.1f}% move" if change_pct is not None else ""
         # A perfectly flat baseline (e.g. delinquency pinned at one value for
         # days) gives an infinite z-score. Reporting "inf standard deviations"
@@ -125,10 +142,10 @@ def detect(rows: list[dict], latest: dict) -> list[dict]:
         if math.isinf(z):
             detail = (f"{label} moved off a previously constant baseline: "
                       f"now {value:,.2f}{unit_s}, and it had been "
-                      f"{med:,.2f} for the whole 7-day window.")
+                      f"{med:,.2f} across the whole {base_desc}.")
         else:
             detail = (f"{label} is {abs(z):.1f} robust standard deviations "
-                      f"{way} its 7-day baseline:{move} to "
+                      f"{way} its {base_desc}:{move} to "
                       f"{value:,.2f}{unit_s} from a typical {med:,.2f}.")
         findings.append({
             "ts": now,
@@ -140,6 +157,8 @@ def detect(rows: list[dict], latest: dict) -> list[dict]:
             "baseline_median": med,
             "z_score": None if math.isinf(z) else round(z, 2),
             "change_pct": round(change_pct, 2) if change_pct is not None else None,
+            "baseline_samples": len(window),
+            "baseline_span_hours": span_hours,
             "unit": unit,
             "detail": detail,
         })

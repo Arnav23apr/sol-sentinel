@@ -31,7 +31,11 @@ from .collect_rpc import rpc
 from .net import FetchError, fetch_json
 
 SAMPLE_BLOCKS = 8
-SLOTS_PER_DAY = 216_000  # ~2.5 slots/s
+# Only used to spread the block samples across roughly a day. The nominal
+# 216,000 (a 400 ms slot) overstates reality by ~5%, which is why nothing
+# extrapolates with it any more; here it merely sets the sampling stride, and
+# the report describes the span it actually covered rather than assuming 24h.
+SLOTS_PER_DAY = 216_000
 VOTE_PROGRAM = "Vote111111111111111111111111111111111111111"
 BASE_FEE_LAMPORTS = 5_000  # per signature, before any priority fee
 LAMPORTS = 1_000_000_000
@@ -136,7 +140,8 @@ def activity() -> dict:
             user_fees.extend(fees)
             block_totals.append(total)
 
-    out: dict = {"sampled_blocks": len(samples)}
+    out: dict = {"sampled_blocks": len(samples),
+                 "sample_span_slots": step * (SAMPLE_BLOCKS - 1)}
     if not samples:
         return out
 

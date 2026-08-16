@@ -109,7 +109,7 @@ export default function App() {
 
   useEffect(() => {
     load()
-    // The collector republishes every 30 minutes; poll so a tab left open
+    // The collector republishes on its schedule; poll so a tab left open
     // picks up the new snapshot without a manual reload.
     const timer = setInterval(load, 5 * 60 * 1000)
     return () => clearInterval(timer)
@@ -239,7 +239,7 @@ export default function App() {
           </div>
           <div className="flex-1 text-[11.5px] text-muted-foreground">
             <span className="mr-1.5 inline-block size-1.5 animate-pulse rounded-full bg-emerald-400 align-middle" />
-            {report.generated_utc} · refreshes every 30 min
+            {report.generated_utc} · scheduled every 30 min, throttled by GitHub to ~50
           </div>
           <div className="flex items-center gap-2">
             <a
@@ -1129,7 +1129,7 @@ export default function App() {
           <Section
             id="validation"
             title="Cross-source validation"
-            note={`${report.crosscheck.agree} of ${report.crosscheck.total} independent sources agree`}
+            note={`${report.crosscheck.agree} of ${report.crosscheck.total} precise checks agree`}
           >
             <Card>
               <p className="mb-3 text-[12px] text-muted-foreground leading-relaxed">
@@ -1156,17 +1156,21 @@ export default function App() {
                     {c.b_source}: {reading(c.b_value)}
                   </span>,
                   pct(c.gap_pct, true),
-                  <span
-                    className={
-                      c.agrees ? "text-emerald-400" : "text-amber-400"
-                    }
-                  >
-                    {c.agrees ? "agree" : "diverge"}
-                    {c.ratio ? ` (${c.ratio.toFixed(2)}x)` : ""}
-                    {c.alerting === false && (
-                      <span className="text-muted-foreground"> · indicative</span>
-                    )}
-                  </span>,
+                  c.alerting === false ? (
+                    // Never the word "agree" for a check whose own noise spans
+                    // several x: a 2.5x ratio is not agreement in any sense a
+                    // reader would accept.
+                    <span className="text-muted-foreground">
+                      indicative{c.ratio ? ` · ${c.ratio.toFixed(2)}x` : ""}
+                      {c.agrees ? " · within band" : " · outside band"}
+                    </span>
+                  ) : (
+                    <span
+                      className={c.agrees ? "text-emerald-400" : "text-amber-400"}
+                    >
+                      {c.agrees ? "agree" : "diverge"}
+                    </span>
+                  ),
                 ])}
               />
             </Card>

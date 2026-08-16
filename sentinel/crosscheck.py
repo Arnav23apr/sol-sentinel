@@ -151,10 +151,17 @@ def crosscheck(snapshot: dict) -> dict:
     checks = [c for c in checks if c]
     for c in checks:
         c.setdefault("alerting", True)
+    alerting = [c for c in checks if c.get("alerting", True)]
+    indicative = [c for c in checks if not c.get("alerting", True)]
     return {
         "checks": checks,
-        "agree": sum(1 for c in checks if c["agrees"]),
-        "total": len(checks),
+        # Counted over precise checks only. Folding an order-of-magnitude
+        # corroboration into an "N of N agree" headline overstates it: a 2.5x
+        # ratio is not agreement in any sense a reader would accept.
+        "agree": sum(1 for c in alerting if c["agrees"]),
+        "total": len(alerting),
+        "indicative_in_band": sum(1 for c in indicative if c["agrees"]),
+        "indicative_total": len(indicative),
         # Only checks precise enough to act on can raise a finding.
         "divergences": [c for c in checks
                         if not c["agrees"] and c.get("alerting", True)],

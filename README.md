@@ -2,7 +2,7 @@
 
 **An autonomous, keyless monitor for the state of the Solana ecosystem.**
 
-Sol Sentinel collects 60+ metrics about Solana every 30 minutes, detects anomalies against rolling baselines, and publishes three synchronized outputs:
+Sol Sentinel collects 60+ metrics about Solana on a scheduled loop, detects anomalies against rolling baselines, and publishes three synchronized outputs:
 
 | Output | What it is |
 |---|---|
@@ -76,7 +76,7 @@ Priority went to direct, keyless sources. Each source is isolated: if one fails,
 
 The brief lists Dune Analytics and Twitter among the sources to prioritise, and also states that solutions requiring no API keys are preferred. Those two asks conflict: Dune's API is key-gated on every tier, and Twitter/X removed free programmatic read access, leaving a paid key or terms-violating scraping.
 
-This resolves the conflict in favour of the keyless constraint, because that constraint is what makes the rest of the design work. With no keys and no packages, the collector runs on a free GitHub Actions runner every 30 minutes forever, anyone can clone the repo and get identical results with zero setup, and there is no credential to rotate, leak, or expire. Adding one keyed source would forfeit all of that for a fraction of the data.
+This resolves the conflict in favour of the keyless constraint, because that constraint is what makes the rest of the design work. With no keys and no packages, the collector runs on a free GitHub Actions runner indefinitely, anyone can clone the repo and get identical results with zero setup, and there is no credential to rotate, leak, or expire. Adding one keyed source would forfeit all of that for a fraction of the data.
 
 Where those sources would have contributed, Sentinel goes to the underlying data instead. Dune dashboards are themselves built on chain data, so Sentinel queries the chain directly, and in several cases measures quantities Dune would have to be trusted for: transaction fee distribution, per-program throughput and failure rates, block production rate, and clock drift are all computed from raw RPC here. The Twitter gap is narrower: announcements arrive through the solana.com and Helius feeds, but social sentiment is genuinely not covered, and no keyless substitute for it exists.
 
@@ -88,7 +88,9 @@ Ankr and dRPC have dropped keyless Solana RPC access; publicnode hangs on `getSu
 
 Two GitHub Actions workflows, both committing back to `main`:
 
-- [`update.yml`](.github/workflows/update.yml) runs every 30 minutes: checkout, run `python -m sentinel.main --once`, commit the refreshed `docs/` and `data/`. There is no dependency-install step because there are no dependencies.
+- [`update.yml`](.github/workflows/update.yml) is scheduled every 30 minutes: checkout, run `python -m sentinel.main --once`, commit the refreshed `docs/` and `data/`. There is no dependency-install step because there are no dependencies.
+
+  **What the schedule actually delivers.** GitHub throttles `schedule:` triggers on free runners, so the requested 30 minutes is an upper bound, not a guarantee. Measured over the first two weeks of operation: 22.3 runs per day against the 48 requested, with a median gap of 53.5 minutes. No run has failed; the gap is scheduler throttling alone. Nothing in the system assumes an exact cadence, which is why it survives this: anomaly baselines are sliced by elapsed time rather than by row count, the block-production rate is measured from how far block height actually advanced between two runs, and net-flow windows compare against the oldest row inside the period instead of a fixed offset. The figures above are computed from `data/history.jsonl` and will drift as the log grows.
 - [`dashboard.yml`](.github/workflows/dashboard.yml) runs only when `dashboard/**` changes: `npm ci && npm run build`, which writes the built app into `docs/`.
 
 Splitting them keeps the 30-minute loop to a bare Python run rather than a Node build. Both share a concurrency group so they never race on a push. GitHub Pages serves `docs/`, so the dashboard and both reports republish automatically with no servers and no cost. Commits made with the built-in `GITHUB_TOKEN` do not retrigger workflows, so there is no run recursion.

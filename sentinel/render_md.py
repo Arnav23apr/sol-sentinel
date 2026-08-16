@@ -58,10 +58,13 @@ def render(s: dict) -> str:
         add(f"| Transaction fee p90 / p99 | "
             f"{fmt.exact(act.get('p90_tx_fee_lamports'))} / "
             f"{fmt.exact(act.get('p99_tx_fee_lamports'))} lamports |")
-        add(f"| Paying base fee only | {fmt.pct(act.get('base_fee_only_pct'))} "
-            f"of {fmt.exact(act.get('fee_sampled_txs'))} sampled transactions |")
+        add(f"| Paying no priority fee | {fmt.pct(act.get('base_fee_only_pct'))} "
+            f"of {fmt.exact(act.get('fee_sampled_txs'))} sampled transactions "
+            f"(compared against the 5,000-lamport single-signature base fee, "
+            f"so multi-signature transactions are not counted here) |")
     if n.get("prio_fee_nonzero_pct") is not None:
-        add(f"| AMM write-lock congestion (150-slot window) | "
+        add(f"| AMM write-lock congestion "
+            f"({fmt.exact(n.get('prio_fee_slots'))}-slot window) | "
             f"{fmt.pct(n['prio_fee_nonzero_pct'])} of slots needed a priority "
             f"fee (max {fmt.num(n.get('max_prioritization_fee'), 1)} µlam/CU) |")
     add(f"| Node version (RPC) | {n.get('node_version', '-')} |")
@@ -182,7 +185,9 @@ def render(s: dict) -> str:
         f"({a.get('sampled_blocks', 0)} blocks over 24h) |")
     add(f"| xStocks tokenized-equity AUM | {fmt.usd(t.get('xstocks_aum_usd'))} |")
     add(f"| xStocks 24h DEX volume | {fmt.usd(t.get('xstocks_volume_24h_usd'))} |")
-    add(f"| xStocks holders | {fmt.num(t.get('xstocks_holders'))} |")
+    add(f"| xStocks holder positions | {fmt.num(t.get('xstocks_holders'))} "
+        f"(summed per ticker, so one wallet holding several is counted "
+        f"more than once) |")
     add(f"| Total RWA TVL on Solana | {fmt.usd(t.get('rwa_tvl_usd'))} |")
     add("")
     if t.get("xstocks_top"):
@@ -197,9 +202,10 @@ def render(s: dict) -> str:
         add("## Program activity and chain health")
         add("")
         if oc.get("drift_secs") is not None:
-            add(f"Chain clock drift: **{oc['drift_secs']:+.1f} s** against wall "
-                f"clock (slots run slightly longer than the nominal 400 ms, so "
-                f"chain time falls behind real time).")
+            add(f"Chain tip lag: **{oc['drift_secs']:+.1f} s**, the age of the "
+                f"newest confirmed block's own timestamp against wall clock. "
+                f"It sits at a steady offset rather than accumulating; a rise "
+                f"means confirmations are falling behind.")
             add("")
         if progs:
             add(f"Throughput and failure rate for major programs, from the last "
@@ -229,8 +235,8 @@ def render(s: dict) -> str:
                              if len(span) == 2 else "")
                 add(f"Median failure rate across the sampled programs: "
                     f"**{fmt.pct(oc['median_program_failure_rate_pct'])}**"
-                    f"{span_note}. This is a consistent trend signal across "
-                    f"these five programs, not a chain-wide rate.")
+                    f"{span_note}. A median over five programs, not a "
+                    f"chain-wide rate, and it varies widely between them.")
                 add("")
         if oc.get("unwithdrawn_sol_top8") is not None:
             add(f"Unwithdrawn inflation rewards sitting in the top 8 vote "
@@ -297,21 +303,31 @@ def render(s: dict) -> str:
     if cc.get("checks"):
         add("## Cross-source validation")
         add("")
+        ind = cc.get("indicative_total", 0)
+        ind_note = ""
+        if ind:
+            ind_note = (f" A further {ind} indicative "
+                        f"{'check is' if ind == 1 else 'checks are'} reported "
+                        f"for corroboration only "
+                        f"({cc.get('indicative_in_band', 0)} within band): "
+                        f"their own measurement noise is wider than any "
+                        f"threshold worth alerting on, so they never raise a "
+                        f"finding and are not counted as agreement.")
         add(f"Quantities that two independent sources can both see, compared "
             f"against each other. {cc.get('agree', 0)} of {cc.get('total', 0)} "
-            f"agree this run. Rows marked *indicative* are reported for "
-            f"corroboration but never raise an alert, because their own "
-            f"measurement noise is wider than any threshold worth acting on.")
+            f"precise checks agree this run.{ind_note}")
         add("")
         add("| Quantity | Source A | Source B | Gap | Verdict |")
         add("|---|---|---|---|---|")
         for c in cc["checks"]:
             unit = f" {c['unit']}" if c.get("unit") else ""
-            verdict = "agree" if c["agrees"] else "**diverge**"
-            if c.get("ratio"):
-                verdict += f" ({c['ratio']:.2f}x)"
             if not c.get("alerting", True):
-                verdict += ", *indicative*"
+                ratio = f"{c['ratio']:.2f}x" if c.get("ratio") else "-"
+                verdict = (f"*indicative*: {ratio}, "
+                           f"{'within' if c['agrees'] else 'outside'} the "
+                           f"order-of-magnitude band")
+            else:
+                verdict = "agree" if c["agrees"] else "**diverge**"
             add(f"| {c['label']} | {c['a_source']}: {fmt.num(c['a_value'], 2)}{unit} "
                 f"| {c['b_source']}: {fmt.num(c['b_value'], 2)}{unit} "
                 f"| {fmt.pct(c.get('gap_pct'), signed=True)} | {verdict} |")
