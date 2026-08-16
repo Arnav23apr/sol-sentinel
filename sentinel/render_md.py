@@ -237,6 +237,28 @@ def render(s: dict) -> str:
                 f"accounts: **{fmt.num(oc['unwithdrawn_sol_top8'], 2)} SOL**.")
             add("")
 
+    # ---- Cross-metric correlation -------------------------------------------
+    co = s.get("correlations") or {}
+    if co.get("top"):
+        add("## What moves together")
+        add("")
+        add(f"Relationships between metrics, rather than each metric on its "
+            f"own. {co['significant_count']} of {co['pairs_tested']} tested "
+            f"pairs survive, over {co.get('sample_size', 0)} observations.")
+        add("")
+        add(f"*Method: {co.get('method', '')}. Changes are correlated rather "
+            f"than levels, because two series that both drift upward correlate "
+            f"near +1 whatever the real relationship. Rank correlation is used "
+            f"so a single outlier cannot manufacture a result.*")
+        add("")
+        add("| Relationship | rho | n | p |")
+        add("|---|---|---|---|")
+        for c in co["top"]:
+            direction = "moves with" if c["rho"] > 0 else "moves against"
+            add(f"| {c['a_label']} {direction} {c['b_label']} "
+                f"| {c['rho']:+.3f} | {c['n']} | {c['p']:.4f} |")
+        add("")
+
     # ---- Cross-source validation -------------------------------------------
     cc = s.get("crosscheck") or {}
     if cc.get("checks"):

@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sentinel import (  # noqa: E402
     anomaly, collect_activity, collect_defi, collect_onchain, collector,
-    crosscheck, fmt, history, main, net,
+    correlate, crosscheck, fmt, history, main, net,
 )
 from sentinel.collect_news import _items_from_feed, _parse_date  # noqa: E402
 
@@ -682,6 +682,130 @@ class TestFormatting(unittest.TestCase):
         self.assertEqual(fmt.exact(5514), "5,514")
         self.assertEqual(fmt.exact(6031), "6,031")
         self.assertEqual(fmt.exact(None), "-")
+
+
+class TestSpearman(unittest.TestCase):
+    def test_perfect_monotonic_relationships(self):
+        xs = [1, 2, 3, 4, 5]
+        self.assertAlmostEqual(correlate.spearman(xs, [2, 4, 6, 8, 10]), 1.0)
+        self.assertAlmostEqual(correlate.spearman(xs, [10, 8, 6, 4, 2]), -1.0)
+
+    def test_monotonic_but_non_linear_still_scores_one(self):
+        # The reason for rank correlation over Pearson: the relationship is
+        # perfect, just not a straight line.
+        xs = [1, 2, 3, 4, 5]
+        self.assertAlmostEqual(correlate.spearman(xs, [1, 4, 9, 16, 25]), 1.0)
+
+    def test_ties_are_averaged(self):
+        self.assertEqual(correlate._ranks([10, 20, 20, 30]), [1.0, 2.5, 2.5, 4.0])
+
+    def test_a_flat_series_has_no_correlation(self):
+        self.assertIsNone(correlate.spearman([1, 2, 3, 4], [7, 7, 7, 7]))
+
+    def test_one_outlier_cannot_manufacture_a_result(self):
+        # Pearson on this pair is dominated by the final point; rank
+        # correlation is not, which is why the module uses Spearman.
+        xs = [1, 2, 3, 4, 5, 6, 7, 1000]
+        ys = [5, 3, 6, 1, 4, 2, 7, 1000]
+        self.assertLess(abs(correlate.spearman(xs, ys)), 0.9)
+
+
+class TestSignificance(unittest.TestCase):
+    def test_t_distribution_matches_published_critical_values(self):
+        # Two-sided 5% critical t is 2.228 at 10 df and 2.086 at 20 df.
+        self.assertAlmostEqual(correlate.t_two_sided_p(2.228, 10), 0.05, places=3)
+        self.assertAlmostEqual(correlate.t_two_sided_p(2.086, 20), 0.05, places=3)
+        self.assertAlmostEqual(correlate.t_two_sided_p(3.169, 10), 0.01, places=3)
+
+    def test_zero_t_is_certainly_not_significant(self):
+        self.assertAlmostEqual(correlate.t_two_sided_p(0.0, 10), 1.0)
+
+    def test_stronger_correlation_gives_smaller_p(self):
+        self.assertLess(correlate.rho_p_value(0.9, 30),
+                        correlate.rho_p_value(0.3, 30))
+
+    def test_same_correlation_is_more_convincing_with_more_data(self):
+        self.assertLess(correlate.rho_p_value(0.5, 60),
+                        correlate.rho_p_value(0.5, 12))
+
+    def test_a_lone_marginal_result_among_many_nulls_is_rejected(self):
+        # The exact situation correlating 78 pairs creates: one p just under
+        # 0.05 surrounded by nulls. A bare 0.05 threshold accepts it; across a
+        # family that size it is far more likely to be chance, and BH says so.
+        pvals = [0.04] + [0.3 + i * 0.03 for i in range(19)]
+        keep = correlate.benjamini_hochberg(pvals, q=0.05)
+        self.assertLess(pvals[0], 0.05)  # a naive threshold would accept it
+        self.assertFalse(any(keep))
+
+    def test_step_up_accepts_the_whole_family_when_the_largest_passes(self):
+        # BH is a step-up procedure, so it is more powerful than Bonferroni:
+        # if the largest p clears its own rank threshold, everything below it
+        # is accepted too. Worth pinning so it is not mistaken for a bug.
+        keep = correlate.benjamini_hochberg([0.0001] + [0.04] * 19, q=0.05)
+        self.assertTrue(all(keep))
+
+    def test_benjamini_hochberg_accepts_a_clear_family_of_signals(self):
+        keep = correlate.benjamini_hochberg([0.0001, 0.0002, 0.0003], q=0.05)
+        self.assertTrue(all(keep))
+
+    def test_benjamini_hochberg_rejects_pure_noise(self):
+        self.assertFalse(any(correlate.benjamini_hochberg([0.4, 0.6, 0.8, 0.99])))
+
+
+class TestCorrelationPipeline(unittest.TestCase):
+    def rows(self, n=60, **series):
+        now = int(time.time())
+        return [{"ts": now - (n - i) * 1800,
+                 **{k: v(i) for k, v in series.items()}} for i in range(n)]
+
+    def test_two_unrelated_trends_do_not_correlate(self):
+        # The central reason changes are correlated rather than levels: both
+        # series rise steadily, so on levels they would score near +1 despite
+        # having nothing to do with each other.
+        rows = self.rows(
+            tps=lambda i: 1000 + i * 10 + (i % 7) * 3,
+            tvl=lambda i: 4e9 + i * 1e6 + (i % 5) * 2e5,
+        )
+        out = correlate.correlations(rows)
+        pair = next((p for p in out["top"]
+                     if {p["a"], p["b"]} == {"tps", "tvl"}), None)
+        self.assertIsNone(pair, "spurious trend correlation was reported")
+
+    def test_a_genuine_relationship_is_found(self):
+        # tvl moves with tps step for step, so their changes agree exactly.
+        rows = self.rows(
+            tps=lambda i: 1000 + (i % 11) * 37,
+            tvl=lambda i: 4e9 + (i % 11) * 37 * 1000,
+        )
+        out = correlate.correlations(rows)
+        pair = next((p for p in out["top"]
+                     if {p["a"], p["b"]} == {"tps", "tvl"}), None)
+        self.assertIsNotNone(pair)
+        self.assertGreater(pair["rho"], 0.9)
+
+    def test_gaps_break_the_chain_rather_than_spanning_them(self):
+        # A stale section records None; differencing across that hole would
+        # invent a change that never happened.
+        rows = self.rows(tps=lambda i: 1000 + i, tvl=lambda i: 4e9 + i)
+        rows[30]["tps"] = None
+        da, db = correlate._aligned_changes(rows, "tps", "tvl")
+        self.assertEqual(len(da), len(db))
+        self.assertLess(len(da), len(rows) - 1)
+
+    def test_thin_series_are_excluded_entirely(self):
+        rows = self.rows(tps=lambda i: 1000 + (i % 5))
+        for r in rows[:-8]:
+            r["xstocks_aum"] = None
+        for i, r in enumerate(rows[-8:]):
+            r["xstocks_aum"] = 3e8 + i
+        out = correlate.correlations(rows)
+        self.assertFalse(any("xstocks_aum" in (p["a"], p["b"])
+                             for p in out["top"]))
+
+    def test_no_history_is_handled(self):
+        out = correlate.correlations([])
+        self.assertEqual(out["top"], [])
+        self.assertEqual(out["pairs_tested"], 0)
 
 
 if __name__ == "__main__":

@@ -488,6 +488,35 @@ export function ShareBar({
   )
 }
 
+/**
+ * A correlation drawn as a bar either side of a zero line, so sign and
+ * strength read instantly and a column of signed decimals does not have to be
+ * parsed one at a time.
+ */
+export function RhoBar({ rho }: { rho: number }) {
+  const pct = Math.min(100, Math.abs(rho) * 100)
+  const positive = rho > 0
+  return (
+    <div className="flex items-center gap-2">
+      <div className="relative h-1.5 w-24 shrink-0 rounded-full bg-muted">
+        <div className="absolute inset-y-0 left-1/2 w-px bg-border" />
+        <div
+          className={cn(
+            "absolute inset-y-0 rounded-full",
+            positive ? "bg-emerald-500/70" : "bg-orange-500/70"
+          )}
+          style={
+            positive
+              ? { left: "50%", width: `${pct / 2}%` }
+              : { right: "50%", width: `${pct / 2}%` }
+          }
+        />
+      </div>
+      <span className="tabular-nums">{rho > 0 ? "+" : ""}{rho.toFixed(2)}</span>
+    </div>
+  )
+}
+
 export function Pill({
   children,
   tone = "muted",

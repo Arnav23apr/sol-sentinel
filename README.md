@@ -110,6 +110,20 @@ A serious incident trips both layers at once (collapsing TPS is simultaneously a
 
 Every finding carries its evidence (value, baseline median, z-score) into all three outputs, so an alert is always explainable.
 
+## What moves together (cross-metric correlation)
+
+Every other section describes one metric at a time. This one looks for relationships between them, which is where the non-obvious observations live: whether REV is driven by DEX volume or by congestion, whether fees track load, whether TVL and trading move in step. See [`sentinel/correlate.py`](sentinel/correlate.py).
+
+Three choices exist to stop it publishing confident nonsense, and each was forced by something the first implementation actually got wrong:
+
+1. **Correlate changes, not levels.** Two series that both drift upward over a window correlate near +1 whatever the underlying relationship. Every series is first-differenced before correlating, so the question becomes "when this moves, does that move with it?" A test pins this: two independently trending series must *not* be reported as related.
+2. **Spearman, not Pearson.** Rank correlation captures monotonic relationships without assuming a straight line, and shrugs off the heavy tails this data is full of. A single 10x fee spike would otherwise dominate the result.
+3. **Correct for multiple comparisons.** Sixteen metrics make 120 pairs; testing them all at 5% yields about six "significant" results by chance. The first run duly announced that delinquent validators move inversely to tokenized-equity AUM. Benjamini-Hochberg controls the false-discovery rate across the whole family, which cut 23 apparent findings to 7. p-values come from an exact Student-t CDF (regularised incomplete beta, Lentz continued fraction) implemented in `correlate.py`, since SciPy is unavailable under the stdlib-only rule.
+
+Pairs are also excluded until a metric has at least 12 hours of history. That threshold is set from evidence rather than taste: at 8 hours the procedure surfaced a -0.73 correlation between delinquent validators and xStocks AUM, two quantities with no plausible mechanism linking them.
+
+What survives is worth reading. A representative run found median transaction fee moving against the share of transactions paying only the base fee (-0.53), and DEX volume moving with REV (+0.49) — both mechanically sensible, which is the point: the method reproduces relationships that must be true, which is what earns trust in the ones that are not obvious.
+
 ## Cross-source validation
 
 Most of this report takes each number on faith from whichever endpoint served it. Three quantities, though, are observable from two independent directions, and comparing them is worth more than either reading alone: agreement is evidence the number is real, and disagreement is itself a finding. Each snapshot checks (see [`sentinel/crosscheck.py`](sentinel/crosscheck.py)):
@@ -152,6 +166,7 @@ sentinel/               the collector: Python standard library only
   collect_activity.py   block sampling, capture-recapture, xStocks, RWA
   collector.py          orchestration + per-source error isolation
   anomaly.py            MAD z-scores + absolute health rules
+  correlate.py          Spearman correlation, exact t-CDF, BH false-discovery
   crosscheck.py         independent-source agreement checks
   collect_onchain.py    program activity, clock drift, vote balances
   history.py            append-only JSONL metric history

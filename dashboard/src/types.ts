@@ -163,6 +163,26 @@ export type OnChain = {
   errors?: Record<string, string>
 }
 
+export type Correlation = {
+  a: string
+  b: string
+  a_label: string
+  b_label: string
+  rho: number
+  n: number
+  p: number
+  significant: boolean
+}
+
+export type Correlations = {
+  method: string
+  metrics_considered: number
+  pairs_tested: number
+  significant_count: number
+  sample_size: number
+  top: Correlation[]
+}
+
 export type CrossCheck = {
   check: string
   label: string
@@ -243,6 +263,7 @@ export type Report = {
   tokenized: Tokenized
   dev: Dev
   onchain?: OnChain
+  correlations?: Correlations
   news: { items: NewsItem[]; feed_errors: Record<string, string> | null }
   crosscheck?: {
     checks: CrossCheck[]

@@ -25,6 +25,7 @@ import {
   LinkList,
   Pill,
   Section,
+  RhoBar,
   ShareBar,
   SectionNav,
   Table,
@@ -208,6 +209,7 @@ export default function App() {
   const { network: n, validators: v, market: m, defi: d } = report
   const { activity: a, tokenized: tk, dev, news } = report
   const oc = report.onchain
+  const co = report.correlations
   const ep = n.epoch
   const anomalies = report.anomalies ?? []
   const priceUp = (m.change_24h_pct ?? 0) >= 0
@@ -326,6 +328,7 @@ export default function App() {
             { id: "defi", label: "DeFi" },
             { id: "activity", label: "Activity" },
             { id: "programs", label: "Programs" },
+            { id: "correlations", label: "Correlations" },
             { id: "validation", label: "Validation" },
             { id: "dev", label: "Development" },
             { id: "news", label: "News" },
@@ -1005,6 +1008,44 @@ export default function App() {
               />
               </Card>
             )}
+          </Section>
+        )}
+
+        {co && co.top.length > 0 && (
+          <Section
+            id="correlations"
+            title="What moves together"
+            note={`${co.significant_count} of ${co.pairs_tested} pairs survive`}
+          >
+            <Card>
+              <p className="mb-3 text-[12px] text-muted-foreground leading-relaxed">
+                Relationships between metrics rather than each metric alone,
+                over {co.sample_size} observations. Changes are correlated, not
+                levels, because two series that both drift upward correlate near
+                +1 whatever the real relationship. Rank correlation is used so a
+                single outlier cannot manufacture a result, and
+                Benjamini-Hochberg false-discovery control is applied across
+                all {co.pairs_tested} pairs, since testing that many at 5% would
+                otherwise yield several by chance alone.
+              </p>
+              <Table
+                head={["Relationship", "Correlation", "n", "p"]}
+                align="llrr"
+                rows={co.top.map((c) => [
+                  <span>
+                    {c.a_label}{" "}
+                    <span className="text-muted-foreground">
+                      {c.rho > 0 ? "moves with" : "moves against"}
+                    </span>{" "}
+                    {c.b_label}
+                  </span>,
+                  <RhoBar rho={c.rho} />,
+                  int(c.n),
+                  c.p < 0.0001 ? "<0.0001" : c.p.toFixed(4),
+                ])}
+                sortKeys={co.top.map((c) => [c.a_label, c.rho, c.n, c.p])}
+              />
+            </Card>
           </Section>
         )}
 

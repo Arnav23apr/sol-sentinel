@@ -11,7 +11,7 @@ import json
 import os
 import time
 
-from . import anomaly, crosscheck, history
+from . import anomaly, correlate, crosscheck, history
 from .collect_activity import activity, tokenized
 from .collect_defi import defi
 from .collect_dev import dev
@@ -139,6 +139,18 @@ def collect(verbose: bool = True) -> dict:
         + crosscheck.divergence_findings(snapshot["crosscheck"]))
     history.append(row)
     snapshot["history"] = (rows + [row])[-1440:]  # last ~30 days for charts
+
+    # Cross-metric correlation, computed over the history including the row
+    # just recorded. Isolated like everything else: a failure here must not
+    # cost the run its report.
+    try:
+        snapshot["correlations"] = correlate.correlations(snapshot["history"])
+        if verbose:
+            c = snapshot["correlations"]
+            print(f"  [ok] correlations ({c['significant_count']} of "
+                  f"{c['pairs_tested']} pairs survive FDR)")
+    except Exception as e:  # noqa: BLE001 — analysis is a nice-to-have
+        snapshot["errors"]["correlations"] = repr(e)
 
     persist = {k: v for k, v in snapshot.items() if k != "history"}
     _write_json(LATEST_PATH, persist)
