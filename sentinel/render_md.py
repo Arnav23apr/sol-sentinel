@@ -237,6 +237,39 @@ def render(s: dict) -> str:
                 f"accounts: **{fmt.num(oc['unwithdrawn_sol_top8'], 2)} SOL**.")
             add("")
 
+    # ---- Exchange & large-holder flows ---------------------------------------
+    fl = s.get("flows") or {}
+    if fl.get("accounts"):
+        add("## Exchange and large-holder balances")
+        add("")
+        d24 = fl.get("change_24h_sol")
+        flow_note = ""
+        if d24 is not None:
+            direction = "onto exchanges" if d24 > 0 else "off exchanges"
+            flow_note = (f" Net **{fmt.num(abs(d24), 0)} SOL "
+                         f"({fmt.pct(abs(fl.get('change_24h_pct') or 0))}) "
+                         f"moved {direction}** over the last "
+                         f"{fl.get('observed_hours_24h', 24)} h.")
+        add(f"{fmt.num(fl.get('total_sol'), 2)} SOL "
+            f"({fmt.usd(fl.get('total_usd'))}) across "
+            f"{fl.get('verified', 0)} publicly-attributed accounts.{flow_note}")
+        add("")
+        add("| Account | Balance (SOL) | Value | Activity | Failed |")
+        add("|---|---|---|---|---|")
+        for acc in fl["accounts"]:
+            rate = (f"{fmt.num(acc['tx_per_hour'], 1)}/h"
+                    if acc.get("tx_per_hour") is not None else "-")
+            add(f"| {acc['label']} | {fmt.num(acc['balance_sol'], 2)} "
+                f"| {fmt.usd(acc.get('balance_usd'))} | {rate} "
+                f"| {acc.get('failed_txs', '-')} |")
+        add("")
+        add("*Balances are re-verified on the chain every run and an account "
+            "is dropped if it no longer holds a meaningful amount, so a stale "
+            "label cannot become a false claim. Attribution is best-effort "
+            "from public sources: Sentinel verifies what an account holds, "
+            "never who controls it.*")
+        add("")
+
     # ---- Cross-metric correlation -------------------------------------------
     co = s.get("correlations") or {}
     if co.get("top"):

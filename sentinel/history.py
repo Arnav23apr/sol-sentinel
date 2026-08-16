@@ -158,6 +158,7 @@ def headline_row(snapshot: dict, stale: Optional[list] = None) -> dict:
         "xstocks_volume": g("tokenized", "xstocks_volume_24h_usd"),
         "rwa_tvl": g("tokenized", "rwa_tvl_usd"),
         "unwithdrawn_sol": g("onchain", "unwithdrawn_sol_top8"),
+        "exchange_sol": g("flows", "total_sol"),
         "median_fee_lamports": g("network", "median_prioritization_fee"),
         "activity_idx": g("activity", "activity_index"),
         "active_cohort": g("activity", "active_cohort_est"),

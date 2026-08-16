@@ -15,6 +15,7 @@ from . import anomaly, correlate, crosscheck, history
 from .collect_activity import activity, tokenized
 from .collect_defi import defi
 from .collect_dev import dev
+from .collect_flows import flows, net_flow
 from .collect_market import market
 from .collect_news import news
 from .collect_onchain import onchain
@@ -106,6 +107,25 @@ def collect(verbose: bool = True) -> dict:
         if verbose:
             print(f"  [FAIL] onchain: {e!r}")
 
+    # Exchange and large-holder balances. Runs after the loop because it uses
+    # the SOL price for a USD figure, and is isolated like every other source.
+    started = time.time()
+    try:
+        snapshot["flows"] = flows(
+            price_usd=(snapshot.get("market") or {}).get("price_usd"))
+        if verbose:
+            fl = snapshot["flows"]
+            print(f"  [ok] flows ({fl['verified']} accounts verified, "
+                  f"{fl['total_sol']:,.0f} SOL, {time.time() - started:.1f}s)")
+    except Exception as e:  # noqa: BLE001 — isolation is the whole point
+        snapshot["errors"]["flows"] = repr(e)
+        prev_section = previous.get("flows")
+        if prev_section is not None:
+            snapshot["flows"] = prev_section
+            snapshot["stale_sections"].append("flows")
+        if verbose:
+            print(f"  [FAIL] flows: {e!r}")
+
     # Block-production rate measured from how far block height advanced
     # between runs. Anything extrapolated from a per-block figure needs this
     # rather than a nominal slots-per-day constant, which runs ~5% high.
@@ -113,6 +133,12 @@ def collect(verbose: bool = True) -> dict:
     rate = history.blocks_per_day(prior_rows)
     if rate and isinstance(snapshot.get("network"), dict):
         snapshot["network"]["blocks_per_day_measured"] = round(rate)
+
+    # Net flow needs the accumulated history, so it is derived once the prior
+    # rows are loaded rather than inside the collector above.
+    if isinstance(snapshot.get("flows"), dict):
+        snapshot["flows"].update(
+            net_flow(prior_rows, snapshot["flows"].get("total_sol")))
 
     # Cross-source validation: compare independently-sourced views of the same
     # quantity. Divergences become findings alongside the anomalies.

@@ -210,6 +210,7 @@ export default function App() {
   const { activity: a, tokenized: tk, dev, news } = report
   const oc = report.onchain
   const co = report.correlations
+  const fl = report.flows
   const ep = n.epoch
   const anomalies = report.anomalies ?? []
   const priceUp = (m.change_24h_pct ?? 0) >= 0
@@ -328,6 +329,7 @@ export default function App() {
             { id: "defi", label: "DeFi" },
             { id: "activity", label: "Activity" },
             { id: "programs", label: "Programs" },
+            { id: "flows", label: "Flows" },
             { id: "correlations", label: "Correlations" },
             { id: "validation", label: "Validation" },
             { id: "dev", label: "Development" },
@@ -1008,6 +1010,80 @@ export default function App() {
               />
               </Card>
             )}
+          </Section>
+        )}
+
+        {fl && fl.accounts.length > 0 && (
+          <Section
+            id="flows"
+            title="Exchange & large-holder balances"
+            note={`${fl.verified} verified accounts`}
+          >
+            <Grid>
+              <Tile
+                label="Tracked on exchanges"
+                value={`${num(fl.total_sol, 2)} SOL`}
+                sub={fl.total_usd ? usd(fl.total_usd) : undefined}
+                spark={sparkOf(scopedHistory, "exchange_sol")}
+                sparkColor="orange"
+                onOpen={() => setOpenMetric("exchange_sol")}
+              />
+              {fl.change_24h_sol != null && (
+                <Tile
+                  label="Net flow, 24h"
+                  value={`${fl.change_24h_sol > 0 ? "+" : ""}${num(fl.change_24h_sol, 2)} SOL`}
+                  delta={
+                    fl.change_24h_pct != null ? pct(fl.change_24h_pct, true) : undefined
+                  }
+                  // Inflows can be sold, so they are the bearish direction.
+                  deltaUp={fl.change_24h_sol < 0}
+                  sub={
+                    fl.change_24h_sol > 0
+                      ? "moving onto exchanges, sellable"
+                      : "moving off exchanges, usually not"
+                  }
+                />
+              )}
+              {fl.change_7d_sol != null && (
+                <Tile
+                  label="Net flow, 7d"
+                  value={`${fl.change_7d_sol > 0 ? "+" : ""}${num(fl.change_7d_sol, 2)} SOL`}
+                  delta={
+                    fl.change_7d_pct != null ? pct(fl.change_7d_pct, true) : undefined
+                  }
+                  deltaUp={fl.change_7d_sol < 0}
+                />
+              )}
+            </Grid>
+            <Card className="mt-2.5">
+              <p className="mb-3 text-[12px] text-muted-foreground leading-relaxed">
+                Exchange balances are the standard read on supply pressure: SOL
+                sitting on an exchange can be sold, SOL that has left usually
+                cannot. Every balance is re-verified on-chain each run and an
+                account is dropped if it no longer holds a meaningful amount, so
+                a stale label cannot become a false claim. Attribution is
+                best-effort from public sources — Sentinel verifies what an
+                account holds, never who controls it.
+              </p>
+              <Table
+                head={["Account", "Balance (SOL)", "Value", "Activity", "Failed"]}
+                align="lrrrr"
+                rows={fl.accounts.map((acc) => [
+                  acc.label,
+                  num(acc.balance_sol, 2),
+                  acc.balance_usd ? usd(acc.balance_usd) : "-",
+                  acc.tx_per_hour != null ? `${num(acc.tx_per_hour, 1)}/h` : "-",
+                  int(acc.failed_txs ?? 0),
+                ])}
+                sortKeys={fl.accounts.map((acc) => [
+                  acc.label,
+                  acc.balance_sol,
+                  acc.balance_usd ?? null,
+                  acc.tx_per_hour ?? null,
+                  acc.failed_txs ?? null,
+                ])}
+              />
+            </Card>
           </Section>
         )}
 

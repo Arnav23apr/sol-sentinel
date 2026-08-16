@@ -163,6 +163,30 @@ export type OnChain = {
   errors?: Record<string, string>
 }
 
+export type FlowAccount = {
+  label: string
+  address: string
+  balance_sol: number
+  balance_usd?: number
+  recent_txs?: number
+  tx_per_hour?: number
+  window_hours?: number
+  failed_txs?: number
+}
+
+export type Flows = {
+  accounts: FlowAccount[]
+  verified: number
+  total_sol: number
+  total_usd?: number
+  dropped_failing_verification?: { label: string; address: string; balance_sol: number }[]
+  change_24h_sol?: number
+  change_24h_pct?: number
+  change_7d_sol?: number
+  change_7d_pct?: number
+  observed_hours_24h?: number
+}
+
 export type Correlation = {
   a: string
   b: string
@@ -264,6 +288,7 @@ export type Report = {
   dev: Dev
   onchain?: OnChain
   correlations?: Correlations
+  flows?: Flows
   news: { items: NewsItem[]; feed_errors: Record<string, string> | null }
   crosscheck?: {
     checks: CrossCheck[]

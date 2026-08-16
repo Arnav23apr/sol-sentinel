@@ -80,6 +80,12 @@ export const METRICS: Record<
     fmt: "num",
     color: "purple",
   },
+  exchange_sol: {
+    label: "SOL held on tracked exchanges",
+    fmt: "num",
+    color: "orange",
+    note: "aggregate across publicly-attributed accounts, verified each run",
+  },
   unwithdrawn_sol: {
     label: "Unwithdrawn rewards (SOL)",
     fmt: "num",
