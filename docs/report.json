@@ -1,8 +1,12 @@
 {
- "ts": 1787030965,
- "generated_utc": "2026-08-18 05:29 UTC",
- "errors": {},
- "stale_sections": [],
+ "ts": 1787032520,
+ "generated_utc": "2026-08-18 05:55 UTC",
+ "errors": {
+  "network": "FetchError(\"getSupply failed on all RPC endpoints: https://api.mainnet-beta.solana.com failed after 2 attempts: TimeoutError('The read operation timed out')\")"
+ },
+ "stale_sections": [
+  "network"
+ ],
  "network": {
   "health": "ok",
   "node_version": "4.2.0",
@@ -394,7 +398,7 @@
   "inflation_total_pct": 3.692,
   "inflation_validator_pct": 3.692,
   "inflation_terminal_pct": 1.5,
-  "blocks_per_day_measured": 205300
+  "blocks_per_day_measured": 205312
  },
  "validators": {
   "active": 689,
@@ -1217,16 +1221,16 @@
  },
  "market": {
   "source": "coingecko",
-  "price_usd": 75.8,
+  "price_usd": 75.68,
   "change_24h_pct": 0.4,
-  "market_cap_usd": 44184219149,
+  "market_cap_usd": 44110727252,
   "market_cap_rank": 7,
-  "volume_24h_usd": 1308308085,
+  "volume_24h_usd": 1318859908,
   "high_24h": 76.13,
   "low_24h": 75.14,
   "ath_usd": 293.31,
-  "ath_change_pct": -74.15808,
-  "circulating_supply": 582895659.9436167,
+  "ath_change_pct": -74.19974,
+  "circulating_supply": 582895652.2272418,
   "price_history_7d": [
    [
     1786428000,
@@ -1565,13 +1569,13 @@
     75.43
    ],
    [
-    1787030890,
-    75.8
+    1787032400,
+    75.68
    ]
   ]
  },
  "defi": {
-  "tvl_usd": 4839839952.0,
+  "tvl_usd": 4839908996.0,
   "tvl_history": [
    [
     1755561600,
@@ -3027,11 +3031,11 @@
    ],
    [
     1786924800,
-    4777056842
+    4777052172
    ],
    [
     1787011200,
-    4839812062
+    4843306219
    ]
   ],
   "stablecoins_usd": 15404699008.0,
@@ -3410,24 +3414,24 @@
     "volume_24h_usd": 137878314
    },
    {
-    "name": "Orca DEX",
-    "volume_24h_usd": 98093181
-   },
-   {
     "name": "Meteora DLMM",
     "volume_24h_usd": 93854404
+   },
+   {
+    "name": "Orca DEX",
+    "volume_24h_usd": 92556540
    },
    {
     "name": "Manifest Trade",
     "volume_24h_usd": 89106677
    },
    {
-    "name": "Raydium AMM",
-    "volume_24h_usd": 81960022
-   },
-   {
     "name": "pump.fun",
     "volume_24h_usd": 80155477
+   },
+   {
+    "name": "Raydium AMM",
+    "volume_24h_usd": 79256139
    }
   ],
   "app_fees_24h_usd": 10772701.0,
@@ -4286,65 +4290,65 @@
  "activity": {
   "sampled_blocks": 8,
   "sample_span_slots": 189000,
-  "median_tx_fee_lamports": 5509,
-  "p90_tx_fee_lamports": 23143,
-  "p99_tx_fee_lamports": 557073,
-  "mean_tx_fee_lamports": 35861,
-  "base_fee_only_pct": 22.1,
-  "fee_sampled_txs": 5990,
-  "avg_fees_per_block_sol": 0.030273,
-  "fees_per_block_sol_low": 0.010872,
-  "fees_per_block_sol_high": 0.049675,
-  "unique_payers_per_block_avg": 287,
+  "median_tx_fee_lamports": 5242,
+  "p90_tx_fee_lamports": 20000,
+  "p99_tx_fee_lamports": 505087,
+  "mean_tx_fee_lamports": 33206,
+  "base_fee_only_pct": 25.3,
+  "fee_sampled_txs": 5593,
+  "avg_fees_per_block_sol": 0.026647,
+  "fees_per_block_sol_low": 0.013212,
+  "fees_per_block_sol_high": 0.040081,
+  "unique_payers_per_block_avg": 267,
   "unique_payers_per_block": [
-   230,
-   228,
-   317,
-   359,
-   390,
-   307,
-   236,
-   230
+   134,
+   277,
+   265,
+   275,
+   407,
+   322,
+   254,
+   203
   ],
-  "union_unique_payers": 1677,
-  "activity_index": 287,
-  "active_cohort_est": 2911,
+  "union_unique_payers": 1519,
+  "activity_index": 267,
+  "active_cohort_est": 2489,
   "estimator": "schnabel"
  },
  "tokenized": {
-  "xstocks_aum_usd": 385949840.0,
+  "xstocks_aum_usd": 386587491.0,
   "xstocks_top": [
    {
     "ticker": "TSLAX",
-    "usd": 61364221.0
+    "usd": 61495932.0
    },
    {
     "ticker": "CRCLX",
-    "usd": 52919845.0
+    "usd": 53192427.0
    },
    {
     "ticker": "SPYX",
-    "usd": 44513496.0
+    "usd": 44500714.0
    },
    {
     "ticker": "MSTRX",
-    "usd": 39232058.0
+    "usd": 39433264.0
    },
    {
     "ticker": "GOOGLX",
-    "usd": 30628996.0
+    "usd": 30647717.0
    },
    {
     "ticker": "QQQX",
-    "usd": 26920436.0
+    "usd": 26907995.0
    },
    {
     "ticker": "GLDX",
-    "usd": 10215455.0
+    "usd": 10216458.0
    },
    {
     "ticker": "COINX",
-    "usd": 10189304.0
+    "usd": 10216068.0
    }
   ],
   "xstocks_history": [
@@ -5065,13 +5069,13 @@
     389304415
    ],
    [
-    1787025251,
-    385951224
+    1787030939,
+    386588876
    ]
   ],
-  "xstocks_volume_24h_usd": 19889507.0,
-  "xstocks_holders": 268460,
-  "rwa_tvl_usd": 1879356610.0,
+  "xstocks_volume_24h_usd": 19901841.0,
+  "xstocks_holders": 268437,
+  "rwa_tvl_usd": 1879144136.0,
   "rwa_top": [
    {
     "name": "BlackRock BUIDL",
@@ -5087,7 +5091,7 @@
    },
    {
     "name": "Ondo Yield Assets",
-    "usd": 178880779.0
+    "usd": 178668305.0
    },
    {
     "name": "Hastra",
@@ -5114,61 +5118,60 @@
     "name": "SPL Token",
     "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
     "sampled": 1000,
-    "failure_rate_pct": 44.3,
-    "window_slots": 2,
-    "window_secs": 0.8,
-    "tx_per_min": 54664,
-    "counted": 754,
-    "low_precision": true
-   },
-   {
-    "name": "Jupiter v6",
-    "address": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-    "sampled": 1000,
-    "failure_rate_pct": 57.9,
-    "window_slots": 26,
-    "window_secs": 10.8,
-    "tx_per_min": 5437,
-    "counted": 975
+    "failure_rate_pct": 46.6,
+    "window_slots": 3,
+    "window_secs": 1.2,
+    "tx_per_min": 29773,
+    "counted": 616
    },
    {
     "name": "Pump.fun",
     "address": "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
     "sampled": 1000,
-    "failure_rate_pct": 53.2,
-    "window_slots": 46,
-    "window_secs": 19.0,
-    "tx_per_min": 2909,
-    "counted": 923
+    "failure_rate_pct": 77.4,
+    "window_slots": 20,
+    "window_secs": 8.3,
+    "tx_per_min": 7156,
+    "counted": 987
+   },
+   {
+    "name": "Jupiter v6",
+    "address": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
+    "sampled": 1000,
+    "failure_rate_pct": 58.2,
+    "window_slots": 41,
+    "window_secs": 17.0,
+    "tx_per_min": 3508,
+    "counted": 992
    },
    {
     "name": "Orca Whirlpools",
     "address": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
     "sampled": 1000,
-    "failure_rate_pct": 56.5,
-    "window_slots": 66,
-    "window_secs": 27.3,
-    "tx_per_min": 2190,
-    "counted": 997
+    "failure_rate_pct": 23.1,
+    "window_slots": 215,
+    "window_secs": 89.0,
+    "tx_per_min": 672,
+    "counted": 996
    },
    {
     "name": "Raydium AMM v4",
     "address": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
     "sampled": 1000,
-    "failure_rate_pct": 31.5,
-    "window_slots": 265,
-    "window_secs": 109.7,
-    "tx_per_min": 547,
-    "counted": 999
+    "failure_rate_pct": 22.1,
+    "window_slots": 320,
+    "window_secs": 132.4,
+    "tx_per_min": 450,
+    "counted": 994
    }
   ],
-  "median_program_failure_rate_pct": 53.2,
+  "median_program_failure_rate_pct": 46.6,
   "failure_rate_span_pct": [
-   31.5,
-   57.9
+   22.1,
+   77.4
   ],
-  "reference_slot": 439997130,
-  "chain_time": 1787031008,
+  "reference_slot": 440001258,
+  "chain_time": 1787032726,
   "drift_secs": 14.9,
   "vote_accounts": [
    {
@@ -5220,7 +5223,7 @@
     "label": "Binance",
     "address": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
     "balance_sol": 9750012.87,
-    "balance_usd": 739050975,
+    "balance_usd": 737880974,
     "recent_txs": 100,
     "window_hours": 9.29,
     "tx_per_hour": 10.8,
@@ -5229,84 +5232,84 @@
    {
     "label": "Binance (2)",
     "address": "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9",
-    "balance_sol": 1561720.6,
-    "balance_usd": 118378421,
+    "balance_sol": 1573790.54,
+    "balance_usd": 119104468,
     "recent_txs": 100,
     "window_hours": 0.12,
-    "tx_per_hour": 835.3,
+    "tx_per_hour": 859.2,
     "failed_txs": 0
    },
    {
     "label": "Gate.io",
     "address": "u6PJ8DtQuPFnfmwHbGFULQ4u4EgjDiyYKjVEsynXq2w",
-    "balance_sol": 392312.19,
-    "balance_usd": 29737264,
+    "balance_sol": 391686.97,
+    "balance_usd": 29642870,
     "recent_txs": 100,
-    "window_hours": 0.8,
-    "tx_per_hour": 125.0,
+    "window_hours": 0.82,
+    "tx_per_hour": 121.6,
     "failed_txs": 0
    },
    {
     "label": "Bybit",
     "address": "AC5RDfQFmDS1deWZos921JfqscXdByf8BKHs5ACWjtW2",
     "balance_sol": 325521.23,
-    "balance_usd": 24674509,
+    "balance_usd": 24635447,
     "recent_txs": 100,
-    "window_hours": 3.81,
-    "tx_per_hour": 26.2,
+    "window_hours": 3.5,
+    "tx_per_hour": 28.6,
     "failed_txs": 0
    },
    {
     "label": "Coinbase",
     "address": "H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS",
-    "balance_sol": 42549.0,
-    "balance_usd": 3225215,
+    "balance_sol": 42436.01,
+    "balance_usd": 3211557,
     "recent_txs": 100,
-    "window_hours": 0.43,
-    "tx_per_hour": 231.2,
+    "window_hours": 0.38,
+    "tx_per_hour": 266.1,
     "failed_txs": 0
    },
    {
     "label": "Coinbase (2)",
     "address": "GJRs4FwHtemZ5ZE9x3FNvJ8TMwitKTh21yxdRPqn7npE",
-    "balance_sol": 42010.92,
-    "balance_usd": 3184427,
+    "balance_sol": 41925.88,
+    "balance_usd": 3172951,
     "recent_txs": 100,
     "window_hours": 0.37,
-    "tx_per_hour": 270.7,
+    "tx_per_hour": 267.1,
     "failed_txs": 0
    },
    {
     "label": "Bitget",
     "address": "A77HErqtfN1hLLpvZ9pCtu66FEtM8BveoaKbbMoZ4RiR",
-    "balance_sol": 36170.13,
-    "balance_usd": 2741696,
+    "balance_sol": 36826.31,
+    "balance_usd": 2787015,
     "recent_txs": 100,
-    "window_hours": 0.73,
-    "tx_per_hour": 137.4,
+    "window_hours": 0.72,
+    "tx_per_hour": 138.5,
     "failed_txs": 0
    },
    {
     "label": "Kraken",
     "address": "BmFdpraQhkiDQE6SnfG5omcA1VwzqfXrwtNYBwWTymy6",
-    "balance_sol": 34858.36,
-    "balance_usd": 2642264,
+    "balance_sol": 34958.18,
+    "balance_usd": 2645635,
     "recent_txs": 100,
-    "window_hours": 0.44,
-    "tx_per_hour": 228.0,
+    "window_hours": 0.54,
+    "tx_per_hour": 185.7,
     "failed_txs": 0
    }
   ],
   "verified": 8,
   "dropped_failing_verification": [],
-  "total_sol": 12185155.3,
-  "total_usd": 923634772,
-  "change_24h_sol": -121871.55,
-  "change_24h_pct": -0.99,
-  "observed_hours_24h": 23.6,
-  "change_7d_sol": -240496.74,
-  "change_7d_pct": -1.935,
-  "observed_hours_7d": 52.6
+  "total_sol": 12197157.99,
+  "total_usd": 923080917,
+  "change_24h_sol": -118911.17,
+  "change_24h_pct": -0.965,
+  "observed_hours_24h": 23.3,
+  "change_7d_sol": -228494.05,
+  "change_7d_pct": -1.839,
+  "observed_hours_7d": 53.1
  },
  "crosscheck": {
   "checks": [
@@ -5314,17 +5317,17 @@
     "check": "chain_fees",
     "label": "Chain fees (24h)",
     "a_source": "sampled blocks (RPC)",
-    "a_value": 471101,
+    "a_value": 414041,
     "b_source": "DeFiLlama",
     "b_value": 732758,
     "unit": "USD",
-    "gap_pct": -43.47,
-    "blocks_per_day": 205300,
+    "gap_pct": -55.58,
+    "blocks_per_day": 205312,
     "a_interval_95": [
-     169187,
-     773029
+     205288,
+     622779
     ],
-    "ratio": 0.64,
+    "ratio": 0.57,
     "agrees": true,
     "basis": "same order of magnitude (within 4x)",
     "alerting": false
@@ -5333,11 +5336,11 @@
     "check": "sol_price",
     "label": "SOL price",
     "a_source": "coingecko",
-    "a_value": 75.8,
+    "a_value": 75.68,
     "b_source": "Jupiter (on-chain DEX)",
     "b_value": 75.66,
     "unit": "USD",
-    "gap_pct": 0.18,
+    "gap_pct": 0.03,
     "tolerance_pct": 2.0,
     "agrees": true,
     "alerting": true
@@ -5348,7 +5351,7 @@
     "a_source": "getSupply (RPC)",
     "a_value": 582895651,
     "b_source": "CoinGecko",
-    "b_value": 582895660,
+    "b_value": 582895652,
     "unit": "SOL",
     "gap_pct": -0.0,
     "tolerance_pct": 2.0,
@@ -5376,7 +5379,7 @@
     "a_label": "DeFi TVL",
     "b_label": "xStocks AUM",
     "rho": 0.261,
-    "n": 357,
+    "n": 358,
     "p": 0.0,
     "significant": true
    },
@@ -5405,9 +5408,9 @@
     "b": "app_fees_24h",
     "a_label": "DEX volume",
     "b_label": "App fees",
-    "rho": 0.185,
-    "n": 357,
-    "p": 0.00046,
+    "rho": 0.184,
+    "n": 358,
+    "p": 0.00045,
     "significant": true
    },
    {
@@ -5421,6 +5424,6 @@
     "significant": true
    }
   ],
-  "sample_size": 398
+  "sample_size": 399
  }
 }
