@@ -1,10 +1,10 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-18 11:15 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-18 11:47 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
-- 🟢 No anomalies detected. All watched metrics are within their 7-day baselines and absolute health thresholds.
+- 🔴 **Delinquent stake** (critical): Delinquent stake is 26.8 robust standard deviations above its 7-day baseline: a 700.0% move to 0.14 % from a typical 0.02.
 
 ## Network performance
 
@@ -20,9 +20,9 @@
 | Lifetime transactions | 539.2B |
 | Circulating supply | 582.9M SOL |
 | Inflation (annual) | 3.69% |
-| Median transaction fee | 5,900 lamports (about $0.00045) |
-| Transaction fee p90 / p99 | 55,000 / 1,005,000 lamports |
-| Paying no priority fee | 19.20% of 5,858 sampled transactions (compared against the 5,000-lamport single-signature base fee, so multi-signature transactions are not counted here) |
+| Median transaction fee | 5,647 lamports (about $0.00043) |
+| Transaction fee p90 / p99 | 29,000 / 604,999 lamports |
+| Paying no priority fee | 19.20% of 5,743 sampled transactions (compared against the 5,000-lamport single-signature base fee, so multi-signature transactions are not counted here) |
 | AMM write-lock congestion (150-slot window) | 7.30% of slots needed a priority fee (max 1.3M µlam/CU) |
 | Node version (RPC) | 4.2.0 |
 
@@ -30,27 +30,27 @@
 
 | Metric | Value |
 |---|---|
-| Active validators | 689 |
-| Delinquent validators | 6 |
-| Delinquent stake | 0.01% |
-| Total active stake | 435.6M SOL |
+| Active validators | 687 |
+| Delinquent validators | 8 |
+| Delinquent stake | 0.14% |
+| Total active stake | 435.1M SOL |
 | Nakamoto coefficient | 18 |
-| Top-5 / Top-10 / Top-20 stake share | 15.39% / 24.39% / 35.72% |
-| Commission (stake-weighted, delegatable validators) | 3.81% |
-| Stake on private (100% commission) validators | 24.18% |
+| Top-5 / Top-10 / Top-20 stake share | 15.41% / 24.42% / 35.77% |
+| Commission (stake-weighted, delegatable validators) | 3.82% |
+| Stake on private (100% commission) validators | 24.21% |
 
 ### Top validators by stake
 
 | # | Vote account | Stake (SOL) | Share | Commission |
 |---|---|---|---|---|
-| 1 | `CcaH…oTN1` | 17.1M | 3.92% | 7% |
-| 2 | `he1i…uBtk` | 16.0M | 3.67% | 0% |
+| 1 | `CcaH…oTN1` | 17.1M | 3.93% | 7% |
+| 2 | `he1i…uBtk` | 16.0M | 3.68% | 0% |
 | 3 | `Catz…Diqb` | 12.5M | 2.87% | 5% |
-| 4 | `3N7s…iD5g` | 12.3M | 2.81% | 0% |
-| 5 | `26pV…3dJx` | 9.2M | 2.11% | 7% |
-| 6 | `51JB…UNAm` | 9.0M | 2.06% | 10% |
+| 4 | `3N7s…iD5g` | 12.3M | 2.82% | 0% |
+| 5 | `26pV…3dJx` | 9.2M | 2.12% | 7% |
+| 6 | `51JB…UNAm` | 9.0M | 2.07% | 10% |
 | 7 | `8Gbw…F8iD` | 8.3M | 1.91% | 0% |
-| 8 | `9QU2…29mF` | 8.0M | 1.83% | 7% |
+| 8 | `9QU2…29mF` | 8.0M | 1.84% | 7% |
 | 9 | `CvSb…wycB` | 7.3M | 1.69% | 5% |
 | 10 | `Dumi…Zk4a` | 6.6M | 1.51% | 0% |
 
@@ -58,10 +58,10 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $75.92 (+0.70% 24h) |
-| Market cap | $44.25B (rank #7) |
-| 24h volume | $1.27B |
-| ATH | $293.31 (-74.12% from ATH) |
+| SOL price | $76.33 (+0.70% 24h) |
+| Market cap | $44.48B (rank #7) |
+| 24h volume | $1.29B |
+| ATH | $293.31 (-73.98% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
@@ -69,9 +69,9 @@
 | Metric | Value |
 |---|---|
 | TVL | $4.86B |
-| Stablecoin supply | $15.39B |
+| Stablecoin supply | $15.40B |
 | DEX volume (24h) | $1.47B (+39.75% 1d) |
-| App fees (24h, all protocols) | $11.05M |
+| App fees (24h, all protocols) | $11.11M |
 | Chain fees (24h) | $732.76K |
 | Jito MEV tips (24h) | $127.61K |
 | **REV - Real Economic Value (24h)** | **$860.37K** (chain fees + MEV tips) |
@@ -109,8 +109,8 @@
 | PumpSwap | $3.19M |
 | pump.fun | $1.41M |
 | Axiom | $1.41M |
+| fomo Wallet | $479.35K |
 | Meteora DLMM | $476.23K |
-| fomo Wallet | $422.11K |
 | Sanctum Validator LSTs | $369.77K |
 | Binance Staked SOL | $228.45K |
 | Jito Liquid Staking | $216.59K |
@@ -119,61 +119,61 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 284 |
-| Persistently-active cohort (capture-recapture est.) | 2.8K |
-| Unique payers across sampled blocks | 1.7K (8 blocks over 24h) |
-| xStocks tokenized-equity AUM | $384.38M |
-| xStocks 24h DEX volume | $19.50M |
+| Activity index: unique fee payers per block (24h sampled avg) | 258 |
+| Persistently-active cohort (capture-recapture est.) | 2.1K |
+| Unique payers across sampled blocks | 1.4K (8 blocks over 24h) |
+| xStocks tokenized-equity AUM | $384.09M |
+| xStocks 24h DEX volume | $19.33M |
 | xStocks holder positions | 268.6K (summed per ticker, so one wallet holding several is counted more than once) |
 | Total RWA TVL on Solana | $1.88B |
 
-Top tokenized equities: TSLAX ($60.95M), CRCLX ($52.56M), SPYX ($44.43M), MSTRX ($39.22M), GOOGLX ($30.69M)
+Top tokenized equities: TSLAX ($61.06M), CRCLX ($52.70M), SPYX ($44.46M), MSTRX ($39.08M), GOOGLX ($30.63M)
 
 ## Program activity and chain health
 
-Chain tip lag: **+15.3 s**, the age of the newest confirmed block's own timestamp against wall clock. It sits at a steady offset rather than accumulating; a rise means confirmations are falling behind.
+Chain tip lag: **+14.2 s**, the age of the newest confirmed block's own timestamp against wall clock. It sits at a steady offset rather than accumulating; a rise means confirmations are falling behind.
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| SPL Token | 95,608 (approx.) | 28.90% | 0.4 s |
-| Pump.fun | 10,991 | 76.50% | 5 s |
-| Orca Whirlpools | 6,204 | 27.70% | 9.6 s |
-| Jupiter v6 | 5,061 | 67.30% | 11.3 s |
-| Raydium AMM v4 | 1,438 | 53.40% | 41.3 s |
+| SPL Token | 94,744 (approx.) | 44.00% | 0.4 s |
+| Pump.fun | 5,146 | 60.40% | 11.3 s |
+| Jupiter v6 | 1,663 | 33.70% | 35.8 s |
+| Raydium AMM v4 | 1,039 | 9.50% | 57.5 s |
+| Orca Whirlpools | 521 | 56.00% | 115 s |
 
-Median failure rate across the sampled programs: **53.40%** (range 27.70% to 76.50%). A median over five programs, not a chain-wide rate, and it varies widely between them.
+Median failure rate across the sampled programs: **44.00%** (range 9.50% to 60.40%). A median over five programs, not a chain-wide rate, and it varies widely between them.
 
 Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **35.28 SOL**.
 
 ## Exchange and large-holder balances
 
-12.18M SOL ($925.02M) across 8 publicly-attributed accounts. Net **92K SOL (0.75%) moved off exchanges** over the last 23.5 h.
+12.18M SOL ($929.96M) across 8 publicly-attributed accounts. Net **91K SOL (0.74%) moved off exchanges** over the last 23.6 h.
 
 | Account | Balance (SOL) | Value | Activity | Failed |
 |---|---|---|---|---|
-| Binance | 9.75M | $740.22M | 5.6/h | 0 |
-| Binance (2) | 1.56M | $118.25M | 1.4K/h | 0 |
-| Gate.io | 398.64K | $30.27M | 134.6/h | 0 |
-| Bybit | 325.52K | $24.71M | 36.2/h | 0 |
-| Coinbase | 43.36K | $3.29M | 183.8/h | 0 |
-| Coinbase (2) | 41.55K | $3.15M | 231.1/h | 0 |
-| Bitget | 34.45K | $2.62M | 190.5/h | 0 |
-| Kraken | 33.03K | $2.51M | 341.2/h | 0 |
+| Binance | 9.75M | $744.22M | 5.6/h | 0 |
+| Binance (2) | 1.56M | $118.72M | 1.2K/h | 0 |
+| Gate.io | 398.61K | $30.43M | 134.7/h | 0 |
+| Bybit | 325.52K | $24.85M | 33.6/h | 0 |
+| Coinbase | 43.11K | $3.29M | 187/h | 0 |
+| Coinbase (2) | 41.42K | $3.16M | 211.4/h | 0 |
+| Bitget | 35.44K | $2.70M | 219.9/h | 0 |
+| Kraken | 33.97K | $2.59M | 182.6/h | 0 |
 
 *Balances are re-verified on the chain every run and an account is dropped if it no longer holds a meaningful amount, so a stale label cannot become a false claim. Attribution is best-effort from public sources: Sentinel verifies what an account holds, never who controls it.*
 
 ## What moves together
 
-Relationships between metrics, rather than each metric on its own. 5 of 117 tested pairs survive, over 408 observations.
+Relationships between metrics, rather than each metric on its own. 5 of 117 tested pairs survive, over 409 observations.
 
 *Method: Spearman rank correlation of period-over-period changes, with Benjamini-Hochberg false-discovery control at q=0.05 across all pairs tested. Changes are correlated rather than levels, because two series that both drift upward correlate near +1 whatever the real relationship. Rank correlation is used so a single outlier cannot manufacture a result.*
 
 | Relationship | rho | n | p |
 |---|---|---|---|
-| DeFi TVL moves with xStocks AUM | +0.258 | 367 | 0.0000 |
-| DEX volume moves with App fees | +0.194 | 367 | 0.0002 |
+| DeFi TVL moves with xStocks AUM | +0.258 | 368 | 0.0000 |
+| DEX volume moves with App fees | +0.194 | 368 | 0.0002 |
 | AMM write-lock congestion moves with Program failure rate | +0.191 | 348 | 0.0003 |
 | Slot time moves with AMM write-lock congestion | +0.189 | 348 | 0.0004 |
 | Non-vote TPS moves with Slot time | +0.165 | 389 | 0.0011 |
@@ -184,9 +184,9 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 586.60K USD | DeFiLlama: 732.76K USD | -22.16% | *indicative*: 0.80x, within the order-of-magnitude band |
-| SOL price | coingecko: 75.92 USD | Jupiter (on-chain DEX): 76.03 USD | -0.14% | agree |
-| Circulating supply | getSupply (RPC): 582.90M SOL | CoinGecko: 582.90M SOL | -0.00% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 424.80K USD | DeFiLlama: 732.76K USD | -53.21% | *indicative*: 0.58x, within the order-of-magnitude band |
+| SOL price | coingecko: 76.33 USD | Jupiter (on-chain DEX): 76.23 USD | +0.13% | agree |
+| Circulating supply | getSupply (RPC): 582.90M SOL | CoinGecko: 582.90M SOL | 0.00% | agree |
 
 ## Protocol development
 
@@ -233,3 +233,11 @@ Quantities that two independent sources can both see, compared against each othe
 ---
 
 **Data sources (all keyless):** Solana JSON-RPC (mainnet-beta + publicnode fallback), DeFiLlama, CoinGecko (Jupiter/Binance/Coinbase fallbacks), GitHub REST, solana.com & Helius RSS.
+
+⚠️ *Sections served from the previous snapshot due to source errors this run: network.*
+
+<details><summary>Collection errors this run</summary>
+
+- `network`: `FetchError("getSupply failed on all RPC endpoints: https://api.mainnet-beta.solana.com failed after 2 attempts: TimeoutError('The read operation timed out')")`
+
+</details>
