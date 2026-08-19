@@ -1,44 +1,45 @@
 # Solana Ecosystem Report
 
-*Generated 2026-08-19 20:50 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
+*Generated 2026-08-19 21:15 UTC by [sol-sentinel](https://github.com/Arnav23apr/sol-sentinel) - auto-updating, keyless, Python-stdlib-only.*
 
 ## Alerts
 
-- 🔴 **SOL price** (critical): SOL price is 15.2 robust standard deviations above its 7-day baseline: a 9.4% move to 82.63 USD from a typical 75.54.
-- 🔴 **DeFi TVL** (critical): DeFi TVL is 10.1 robust standard deviations above its 7-day baseline: a 5.5% move to 5,085,999,627.00 USD from a typical 4,821,339,539.00.
+- 🔴 **Delinquent stake** (critical): Delinquent stake is 6.6 robust standard deviations above its 7-day baseline: a 229.4% move to 0.06 % from a typical 0.02.
+- 🔴 **SOL price** (critical): SOL price is 21.9 robust standard deviations above its 7-day baseline: a 13.7% move to 85.92 USD from a typical 75.54.
+- 🔴 **DeFi TVL** (critical): DeFi TVL is 10.4 robust standard deviations above its 7-day baseline: a 5.7% move to 5,096,379,191.00 USD from a typical 4,821,339,539.00.
 
 ## Network performance
 
 | Metric | Value |
 |---|---|
 | RPC health | ok |
-| TPS (total, 10-min median) | 4.4K |
-| TPS (non-vote) | 2.7K |
+| TPS (total, 10-min median) | 6.6K |
+| TPS (non-vote) | 4.9K |
 | Slot time | 413.8 ms |
 | Slot | 440M |
 | Block height | 418M |
-| Epoch | 1019 (30.01% complete, ~34.8h remaining) |
-| Lifetime transactions | 539.7B |
+| Epoch | 1019 (30.83% complete, ~34.3h remaining) |
+| Lifetime transactions | 539.8B |
 | Circulating supply | 583.0M SOL |
 | Inflation (annual) | 3.69% |
-| Median transaction fee | 5,469 lamports (about $0.00045) |
-| Transaction fee p90 / p99 | 29,000 / 499,723 lamports |
-| Paying no priority fee | 15.20% of 9,154 sampled transactions (compared against the 5,000-lamport single-signature base fee, so multi-signature transactions are not counted here) |
-| AMM write-lock congestion (150-slot window) | 20.00% of slots needed a priority fee (max 21.9M µlam/CU) |
+| Median transaction fee | 5,500 lamports (about $0.00047) |
+| Transaction fee p90 / p99 | 23,000 / 452,143 lamports |
+| Paying no priority fee | 18.00% of 8,002 sampled transactions (compared against the 5,000-lamport single-signature base fee, so multi-signature transactions are not counted here) |
+| AMM write-lock congestion (150-slot window) | 14.70% of slots needed a priority fee (max 13.7M µlam/CU) |
 | Node version (RPC) | 4.2.0 |
 
 ## Validators & decentralization
 
 | Metric | Value |
 |---|---|
-| Active validators | 688 |
-| Delinquent validators | 8 |
-| Delinquent stake | 0.02% |
-| Total active stake | 435.1M SOL |
+| Active validators | 687 |
+| Delinquent validators | 9 |
+| Delinquent stake | 0.06% |
+| Total active stake | 435.0M SOL |
 | Nakamoto coefficient | 18 |
-| Top-5 / Top-10 / Top-20 stake share | 15.38% / 24.38% / 35.72% |
+| Top-5 / Top-10 / Top-20 stake share | 15.38% / 24.39% / 35.73% |
 | Commission (stake-weighted, delegatable validators) | 3.81% |
-| Stake on private (100% commission) validators | 24.19% |
+| Stake on private (100% commission) validators | 24.20% |
 
 ### Top validators by stake
 
@@ -59,17 +60,17 @@
 
 | Metric | Value |
 |---|---|
-| SOL price | $82.63 (+6.70% 24h) |
-| Market cap | $48.15B (rank #7) |
-| 24h volume | $3.22B |
-| ATH | $293.31 (-71.83% from ATH) |
+| SOL price | $85.92 (+8.80% 24h) |
+| Market cap | $50.18B (rank #7) |
+| 24h volume | $3.79B |
+| ATH | $293.31 (-70.71% from ATH) |
 | Price source | coingecko |
 
 ## DeFi & economic indicators
 
 | Metric | Value |
 |---|---|
-| TVL | $5.09B |
+| TVL | $5.10B |
 | Stablecoin supply | $15.66B |
 | DEX volume (24h) | $1.84B (+24.62% 1d) |
 | App fees (24h, all protocols) | $8.77M |
@@ -120,62 +121,63 @@
 
 | Metric | Value |
 |---|---|
-| Activity index: unique fee payers per block (24h sampled avg) | 331 |
+| Activity index: unique fee payers per block (24h sampled avg) | 348 |
 | Persistently-active cohort (capture-recapture est.) | 3.5K |
-| Unique payers across sampled blocks | 1.9K (8 blocks over 24h) |
-| xStocks tokenized-equity AUM | $399.01M |
-| xStocks 24h DEX volume | $26.30M |
+| Unique payers across sampled blocks | 2.0K (8 blocks over 24h) |
+| xStocks tokenized-equity AUM | $399.65M |
+| xStocks 24h DEX volume | $27.08M |
 | xStocks holder positions | 271.1K (summed per ticker, so one wallet holding several is counted more than once) |
 | Total RWA TVL on Solana | $1.90B |
 
-Top tokenized equities: TSLAX ($63.16M), CRCLX ($57.64M), SPYX ($44.73M), MSTRX ($41.98M), GOOGLX ($30.84M)
+Top tokenized equities: TSLAX ($63.21M), CRCLX ($57.85M), SPYX ($44.88M), MSTRX ($41.97M), GOOGLX ($30.91M)
 
 ## Program activity and chain health
 
-Chain tip lag: **+15.1 s**, the age of the newest confirmed block's own timestamp against wall clock. It sits at a steady offset rather than accumulating; a rise means confirmations are falling behind.
+Chain tip lag: **+15.7 s**, the age of the newest confirmed block's own timestamp against wall clock. It sits at a steady offset rather than accumulating; a rise means confirmations are falling behind.
 
 Throughput and failure rate for major programs, from the last 1,000 signatures on each, timed by slot span. The failure rate is a direct read on user experience and is not published by volume-only dashboards.
 
 | Program | Transactions/min | Failed | Sample window |
 |---|---|---|---|
-| SPL Token | 99,903 (approx.) | 45.10% | 0.4 s |
-| Jupiter v6 | 36,298 | 82.20% | 1.2 s |
-| Orca Whirlpools | 32,697 | 55.80% | 1.7 s |
-| Pump.fun | 15,644 | 83.20% | 3.7 s |
-| Raydium AMM v4 | 3,359 | 54.60% | 17.8 s |
+| SPL Token | 105,703 (approx.) | 63.00% | 0.4 s |
+| Pump.fun | 71,701 (approx.) | 95.20% | 0.8 s |
+| Jupiter v6 | 33,929 | 83.10% | 1.7 s |
+| Orca Whirlpools | 11,829 | 78.60% | 5 s |
+| Raydium AMM v4 | 6,873 | 33.50% | 8.3 s |
 
-Median failure rate across the sampled programs: **55.80%** (range 45.10% to 83.20%). A median over five programs, not a chain-wide rate, and it varies widely between them.
+Median failure rate across the sampled programs: **78.60%** (range 33.50% to 95.20%). A median over five programs, not a chain-wide rate, and it varies widely between them.
 
 Unwithdrawn inflation rewards sitting in the top 8 vote accounts: **390.80 SOL**.
 
 ## Exchange and large-holder balances
 
-12.60M SOL ($1.04B) across 7 publicly-attributed accounts. Net **442K SOL (3.63%) moved onto exchanges** over the last 23.6 h.
+12.64M SOL ($1.09B) across 8 publicly-attributed accounts. Net **492K SOL (4.05%) moved onto exchanges** over the last 23.5 h.
 
 | Account | Balance (SOL) | Value | Activity | Failed |
 |---|---|---|---|---|
-| Binance | 9.75M | $805.64M | 1.9/h | 0 |
-| Binance (2) | 1.97M | $162.60M | 957.4/h | 0 |
-| Gate.io | 377.12K | $31.16M | 153.9/h | 1 |
-| Bybit | 325.52K | $26.90M | 66.3/h | 0 |
-| Bitget | 63.99K | $5.29M | 252.6/h | 0 |
-| Coinbase | 63.53K | $5.25M | 499.3/h | 0 |
-| Coinbase (2) | 53.39K | $4.41M | 436.9/h | 0 |
+| Binance | 9.75M | $837.72M | 1.9/h | 0 |
+| Binance (2) | 1.98M | $169.74M | 2.2K/h | 0 |
+| Gate.io | 375.57K | $32.27M | 261.4/h | 0 |
+| Bybit | 325.52K | $27.97M | 67/h | 0 |
+| Bitget | 64.54K | $5.55M | 266.5/h | 0 |
+| Coinbase | 63.36K | $5.44M | 541.4/h | 0 |
+| Coinbase (2) | 53.23K | $4.57M | 518/h | 0 |
+| Kraken | 35.13K | $3.02M | 358.6/h | 0 |
 
 *Balances are re-verified on the chain every run and an account is dropped if it no longer holds a meaningful amount, so a stale label cannot become a false claim. Attribution is best-effort from public sources: Sentinel verifies what an account holds, never who controls it.*
 
 ## What moves together
 
-Relationships between metrics, rather than each metric on its own. 4 of 117 tested pairs survive, over 463 observations.
+Relationships between metrics, rather than each metric on its own. 4 of 117 tested pairs survive, over 464 observations.
 
 *Method: Spearman rank correlation of period-over-period changes, with Benjamini-Hochberg false-discovery control at q=0.05 across all pairs tested. Changes are correlated rather than levels, because two series that both drift upward correlate near +1 whatever the real relationship. Rank correlation is used so a single outlier cannot manufacture a result.*
 
 | Relationship | rho | n | p |
 |---|---|---|---|
-| DeFi TVL moves with xStocks AUM | +0.230 | 422 | 0.0000 |
-| AMM write-lock congestion moves with Program failure rate | +0.195 | 388 | 0.0001 |
-| Non-vote TPS moves with Slot time | +0.177 | 429 | 0.0002 |
-| DEX volume moves with App fees | +0.163 | 422 | 0.0008 |
+| DeFi TVL moves with xStocks AUM | +0.234 | 423 | 0.0000 |
+| AMM write-lock congestion moves with Program failure rate | +0.190 | 389 | 0.0002 |
+| Non-vote TPS moves with Slot time | +0.177 | 430 | 0.0002 |
+| DEX volume moves with App fees | +0.163 | 423 | 0.0008 |
 
 ## Cross-source validation
 
@@ -183,8 +185,8 @@ Quantities that two independent sources can both see, compared against each othe
 
 | Quantity | Source A | Source B | Gap | Verdict |
 |---|---|---|---|---|
-| Chain fees (24h) | sampled blocks (RPC): 884.50K USD | DeFiLlama: 649.17K USD | +30.69% | *indicative*: 1.36x, within the order-of-magnitude band |
-| SOL price | coingecko: 82.63 USD | Jupiter (on-chain DEX): 83.85 USD | -1.47% | agree |
+| Chain fees (24h) | sampled blocks (RPC): 593.68K USD | DeFiLlama: 649.17K USD | -8.93% | *indicative*: 0.91x, within the order-of-magnitude band |
+| SOL price | coingecko: 85.92 USD | Jupiter (on-chain DEX): 86.16 USD | -0.28% | agree |
 | Circulating supply | getSupply (RPC): 583.01M SOL | CoinGecko: 583.01M SOL | -0.00% | agree |
 
 ## Protocol development
